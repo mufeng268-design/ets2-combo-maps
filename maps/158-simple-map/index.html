@@ -1,0 +1,3444 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<script>
+// 防调试保护
+setInterval(function(){
+    if(typeof console._commandLineAPI !== 'undefined') {
+        window.location.reload();
+    }
+}, 1000);
+
+// 右键菜单禁用
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+
+// 禁止F12和开发者工具
+document.onkeydown = function(e) {
+    if(e.keyCode == 123) return false;
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 73) return false;
+    if(e.ctrlKey && e.keyCode == 85) return false;
+};
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欧卡2 组合地图模组排序</title>
+    <!-- 网站图标 (Logo) - 使用 Font Awesome 卡车图标作为动态生成的 favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3Cpath fill='%2300e0ff' d='M48 0C21.5 0 0 21.5 0 48V368c0 26.5 21.5 48 48 48H64c0 53 43 96 96 96s96-43 96-96H384c0 53 43 96 96 96s96-43 96-96h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V288 256 237.3c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7H416V48c0-26.5-21.5-48-48-48H48zM416 160h50.7L544 237.3V256H416V160zM112 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm368-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z'/%3E%3C/svg%3E" type="image/svg+xml">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 谷歌字体 - 科技感字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 所有样式保持不变，仅追加新样式：右侧面板独立滚动 + 快速返回顶部按钮(rocket) 
+           并交换了主题按钮和火箭按钮的位置 (fixed-bottom 内顺序互换) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.2s ease;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* ========== 开灯模式 - 明亮科技感 ========== */
+        body.light-mode {
+            background: linear-gradient(135deg, #e0f0ff 0%, #c0d8f0 100%);
+            color: #1a2a3a;
+        }
+
+        body.light-mode::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.25"><path d="M200,500 L250,450 L300,450 L350,400 L450,400 L500,450 L600,450 L650,400 L750,400 L800,450 L900,450 L950,500 L950,550 L900,600 L800,600 L750,550 L650,550 L600,600 L500,600 L450,550 L350,550 L300,600 L250,600 L200,550 Z" fill="%23336699"/><path d="M400,400 L450,350 L550,350 L600,400 L600,450 L550,450 L450,450 L400,450 Z" fill="%234d88cc"/><path d="M650,400 L700,350 L800,350 L850,400 L850,450 L800,450 L700,450 L650,450 Z" fill="%234d88cc"/><circle cx="300" cy="600" r="40" fill="%23222"/><circle cx="850" cy="600" r="40" fill="%23222"/><circle cx="450" cy="600" r="35" fill="%23333"/><circle cx="700" cy="600" r="35" fill="%23333"/><path d="M150,500 L200,450 L250,450 L300,400 L900,400 L950,450 L1000,450 L1050,500 L1050,550 L1000,600 L950,600 L900,550 L300,550 L250,600 L200,600 L150,550 Z" fill="none" stroke="%23336699" stroke-width="3" stroke-dasharray="5,5"/></svg>');
+            background-repeat: repeat;
+            background-size: 600px auto;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body.light-mode::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 40%, rgba(0, 150, 255, 0.15) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 70%, rgba(100, 200, 255, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ========== 关灯模式 - 深邃科技感 ========== */
+        body.dark-mode {
+            background: linear-gradient(135deg, #050814 0%, #12172a 100%);
+            color: #e0f0ff;
+        }
+
+        body.dark-mode::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.15"><path d="M200,500 L250,450 L300,450 L350,400 L450,400 L500,450 L600,450 L650,400 L750,400 L800,450 L900,450 L950,500 L950,550 L900,600 L800,600 L750,550 L650,550 L600,600 L500,600 L450,550 L350,550 L300,600 L250,600 L200,550 Z" fill="%234a6fa5"/><path d="M400,400 L450,350 L550,350 L600,400 L600,450 L550,450 L450,450 L400,450 Z" fill="%236d8fc6"/><path d="M650,400 L700,350 L800,350 L850,400 L850,450 L800,450 L700,450 L650,450 Z" fill="%236d8fc6"/><circle cx="300" cy="600" r="40" fill="%23333"/><circle cx="850" cy="600" r="40" fill="%23333"/><circle cx="450" cy="600" r="35" fill="%23222"/><circle cx="700" cy="600" r="35" fill="%23222"/><path d="M150,500 L200,450 L250,450 L300,400 L900,400 L950,450 L1000,450 L1050,500 L1050,550 L1000,600 L950,600 L900,550 L300,550 L250,600 L200,600 L150,550 Z" fill="none" stroke="%234a6fa5" stroke-width="3" stroke-dasharray="5,5"/></svg>');
+            background-repeat: repeat;
+            background-size: 600px auto;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body.dark-mode::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 100, 255, 0.15) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 30%, rgba(50, 150, 255, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ========== 标题栏 ========== */
+        body.light-mode .header-bar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 100, 200, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(0, 50, 150, 0.3);
+        }
+
+        body.dark-mode .header-bar {
+            background: rgba(10, 15, 30, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 200, 255, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0, 150, 255, 0.3);
+        }
+
+        .header-bar {
+            padding: 22px 30px 14px;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 100;
+            width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        body.light-mode h1 {
+            color: #0066aa;
+            text-shadow: 0 0 15px rgba(0, 100, 200, 0.5), 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode h1 {
+            color: #00e0ff;
+            text-shadow: 0 0 20px rgba(0, 200, 255, 0.7), 0 4px 12px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 2px;
+            line-height: 1.3;
+            white-space: nowrap;
+            flex: 1;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .header-left, .header-right {
+            width: 200px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-left {
+            justify-content: flex-start;
+        }
+
+        .header-right {
+            justify-content: flex-end;
+        }
+
+        /* 语言和版本切换 */
+        body.light-mode .lang-selector, body.light-mode .ver-selector {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 100, 200, 0.5);
+            color: #004080;
+            box-shadow: 0 0 15px rgba(0, 100, 200, 0.2);
+        }
+
+        body.dark-mode .lang-selector, body.dark-mode .ver-selector {
+            background: rgba(10, 20, 40, 0.6);
+            border: 1px solid rgba(0, 200, 255, 0.5);
+            color: #e0f0ff;
+            box-shadow: 0 0 15px rgba(0, 150, 255, 0.3);
+        }
+
+        .lang-selector, .ver-selector {
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+            width: 160px;
+            text-align: left;
+            transition: all 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: none !important;
+            position: relative;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .lang-selector::after, .ver-selector::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        body.light-mode .lang-selector::after, body.light-mode .ver-selector::after {
+            color: #0066aa;
+        }
+
+        body.dark-mode .lang-selector::after, body.dark-mode .ver-selector::after {
+            color: #00e0ff;
+            text-shadow: 0 0 8px #00a0ff;
+        }
+
+        .lang-selector:hover, .ver-selector:hover {
+            transform: translateY(-2px);
+        }
+
+        body.light-mode .lang-selector:hover, body.light-mode .ver-selector:hover {
+            border-color: #0088ff;
+            box-shadow: 0 0 20px rgba(0, 100, 255, 0.4);
+        }
+
+        body.dark-mode .lang-selector:hover, body.dark-mode .ver-selector:hover {
+            border-color: #00e0ff;
+            box-shadow: 0 0 20px #00a0ff;
+        }
+
+        /* 副标题 */
+        body.light-mode .subtitle {
+            color: #cc6600;
+            text-shadow: 0 0 10px rgba(255, 120, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .subtitle {
+            color: #ffaa00;
+            text-shadow: 0 0 15px #ffaa00, 0 2px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .subtitle {
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 6px;
+            line-height: 1.4;
+            white-space: nowrap;
+            width: 100%;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            height: calc(100vh - 180px);
+            overflow: hidden;
+            padding: 20px 30px 20px 20px;
+            gap: 20px;
+        }
+
+        /* 左右面板 */
+        body.light-mode .left-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 100, 200, 0.3);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 100, 200, 0.2) inset;
+        }
+
+        body.dark-mode .left-panel {
+            background: rgba(15, 20, 35, 0.6);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 200, 255, 0.1) inset;
+        }
+
+        .left-panel {
+            width: 320px;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            height: 100%;
+            backdrop-filter: blur(16px);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .right-panel {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 100, 200, 0.3);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 100, 200, 0.2) inset;
+        }
+
+        body.dark-mode .right-panel {
+            background: rgba(15, 20, 35, 0.5);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 200, 255, 0.1) inset;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 25px 30px 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: hidden;
+            height: 100%;
+            backdrop-filter: blur(16px);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        /* 右侧面板内部滚动容器 */
+        .right-panel .table-container {
+            margin: 0;
+            border-radius: 30px;
+            overflow-y: auto !important;
+            overflow-x: auto;
+            padding: 0;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            scroll-behavior: smooth;
+        }
+
+        /* 左侧区域标题 */
+        body.light-mode .left-section-title {
+            color: #0066aa;
+            text-shadow: 0 0 8px rgba(0, 100, 200, 0.5);
+            border-left: 4px solid #0066aa;
+        }
+
+        body.dark-mode .left-section-title {
+            color: #00e0ff;
+            text-shadow: 0 0 10px #00a0ff;
+            border-left: 4px solid #00e0ff;
+        }
+
+        .left-section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            padding-left: 10px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+            line-height: 1.2;
+            transition: all 0.3s ease;
+        }
+
+        /* 统计按钮 */
+        body.light-mode #statAll { 
+            background: linear-gradient(145deg, #d0e0ff, #b0c8f0); 
+            color: #003366; 
+            border-color: #3366cc;
+            box-shadow: 0 5px 15px rgba(0, 50, 150, 0.2), 0 0 0 1px #3366cc inset;
+        }
+        body.light-mode #statUpdate { 
+            background: linear-gradient(145deg, #b0d0ff, #80a0e0); 
+            color: #002244; 
+            border-color: #2277ff;
+            box-shadow: 0 5px 15px rgba(0, 100, 200, 0.3), 0 0 0 1px #2277ff inset;
+        }
+        body.light-mode #statNew { 
+            background: linear-gradient(145deg, #a0e0c0, #70b090); 
+            color: #003322; 
+            border-color: #22aa55;
+            box-shadow: 0 5px 15px rgba(0, 150, 100, 0.2), 0 0 0 1px #22aa55 inset;
+        }
+        body.light-mode #statMove { 
+            background: linear-gradient(145deg, #ffe0a0, #d0b070); 
+            color: #443300; 
+            border-color: #cc8800;
+            box-shadow: 0 5px 15px rgba(200, 120, 0, 0.2), 0 0 0 1px #cc8800 inset;
+        }
+        body.light-mode #statDelete { 
+            background: linear-gradient(145deg, #ffb0b0, #d08080); 
+            color: #440000; 
+            border-color: #cc4444;
+            box-shadow: 0 5px 15px rgba(200, 0, 0, 0.2), 0 0 0 1px #cc4444 inset;
+        }
+        body.light-mode #statFavorites { 
+            background: linear-gradient(145deg, #ffd700, #e6c200); 
+            color: #332200; 
+            border-color: #ffaa00;
+            box-shadow: 0 5px 15px rgba(255, 200, 0, 0.3), 0 0 0 1px #ffaa00 inset;
+        }
+
+        body.dark-mode #statAll { 
+            background: linear-gradient(145deg, #2a3a60, #1a2a45); 
+            color: #aac9ff; 
+            border-color: #4a7ac0;
+            box-shadow: 0 5px 15px rgba(0, 100, 255, 0.3), 0 0 0 1px #4a7ac0 inset;
+        }
+        body.dark-mode #statUpdate { 
+            background: linear-gradient(145deg, #1a4a8a, #0a2a5a); 
+            color: #b0e0ff; 
+            border-color: #2a9aff;
+            box-shadow: 0 5px 15px rgba(0, 150, 255, 0.4), 0 0 0 1px #2a9aff inset;
+        }
+        body.dark-mode #statNew { 
+            background: linear-gradient(145deg, #1a6a4a, #0a3a2a); 
+            color: #a0ffc0; 
+            border-color: #2aff8a;
+            box-shadow: 0 5px 15px rgba(0, 255, 150, 0.3), 0 0 0 1px #2aff8a inset;
+        }
+        body.dark-mode #statMove { 
+            background: linear-gradient(145deg, #8a6a1a, #5a3a0a); 
+            color: #ffe0a0; 
+            border-color: #ffb02a;
+            box-shadow: 0 5px 15px rgba(255, 180, 0, 0.3), 0 0 0 1px #ffb02a inset;
+        }
+        body.dark-mode #statDelete { 
+            background: linear-gradient(145deg, #8a2a2a, #5a1a1a); 
+            color: #ffb0b0; 
+            border-color: #ff4a4a;
+            box-shadow: 0 5px 15px rgba(255, 50, 50, 0.3), 0 0 0 1px #ff4a4a inset;
+        }
+        body.dark-mode #statFavorites { 
+            background: linear-gradient(145deg, #8a6a1a, #5a3a0a); 
+            color: #ffd700; 
+            border-color: #ffb02a;
+            box-shadow: 0 5px 15px rgba(255, 200, 0, 0.3), 0 0 0 1px #ffb02a inset;
+        }
+
+        .left-stats, .left-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-btn, .action-btn, .join-btn, .favorite-btn {
+            padding: 0 20px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            width: 100%;
+            height: 54px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            backdrop-filter: blur(4px);
+            position: relative;
+            z-index: 2;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .stat-btn i, .action-btn i, .join-btn i, .favorite-btn i { 
+            width: 24px; 
+            font-size: 1.2rem;
+        }
+
+        body.light-mode .stat-btn i, body.light-mode .action-btn i, body.light-mode .join-btn i, body.light-mode .favorite-btn i {
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        body.dark-mode .stat-btn i, body.dark-mode .action-btn i, body.dark-mode .join-btn i, body.dark-mode .favorite-btn i {
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        /* 操作按钮 */
+        body.light-mode .action-btn, body.light-mode .join-btn, body.light-mode .favorite-btn {
+            background: linear-gradient(145deg, #c0d0f0, #a0b8e0);
+            color: #003366;
+            border: 1px solid #3366cc;
+            box-shadow: 0 5px 15px rgba(0, 50, 150, 0.2), 0 0 0 1px #3366cc inset;
+        }
+
+        body.dark-mode .action-btn, body.dark-mode .join-btn, body.dark-mode .favorite-btn {
+            background: linear-gradient(145deg, #1a2a45, #0a1a30);
+            color: #b0e0ff;
+            border: 1px solid #2a6ac0;
+            box-shadow: 0 5px 15px rgba(0, 100, 200, 0.3), 0 0 0 1px #2a6ac0 inset;
+        }
+
+        .stat-btn.purple {
+            background: linear-gradient(145deg, #a87bff, #8b5cf6) !important;
+            color: white !important;
+            border-color: #c7adff !important;
+            box-shadow: 0 5px 20px #a04aff, 0 0 0 1px #c07aff inset !important;
+        }
+
+        .stat-btn:hover, .action-btn:hover, .join-btn:hover, .favorite-btn:hover {
+            transform: translateX(5px) scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        body.light-mode .stat-btn:hover, body.light-mode .action-btn:hover, body.light-mode .join-btn:hover, body.light-mode .favorite-btn:hover {
+            box-shadow: 0 8px 25px rgba(0, 50, 150, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.5) inset;
+        }
+
+        body.dark-mode .stat-btn:hover, body.dark-mode .action-btn:hover, body.dark-mode .join-btn:hover, body.dark-mode .favorite-btn:hover {
+            box-shadow: 0 8px 25px currentColor, 0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        /* 搜索框行 */
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        /* 搜索历史下拉菜单 */
+        .search-history-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 5px;
+            background: rgba(15, 25, 45, 0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 200, 255, 0.4);
+            box-shadow: 0 10px 30px -8px rgba(0, 150, 255, 0.4);
+            z-index: 1000;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        body.light-mode .search-history-dropdown {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 100, 200, 0.4);
+        }
+
+        .search-history-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.1);
+            color: #c0e0ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        body.light-mode .search-history-item {
+            color: #004080;
+            border-bottom-color: rgba(0, 100, 200, 0.1);
+        }
+
+        .search-history-item:hover {
+            background: rgba(0, 150, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        body.light-mode .search-history-item:hover {
+            background: rgba(0, 100, 255, 0.1);
+        }
+
+        .search-history-item i {
+            width: 20px;
+            font-size: 0.9rem;
+            color: #00a0ff;
+        }
+
+        body.light-mode .search-history-item i {
+            color: #0066aa;
+        }
+
+        .search-history-header {
+            padding: 12px 20px;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+            color: #00e0ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.light-mode .search-history-header {
+            color: #0066aa;
+            border-bottom-color: rgba(0, 100, 200, 0.2);
+        }
+
+        .clear-history-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+
+        .clear-history-btn:hover {
+            background: rgba(255, 100, 100, 0.2);
+        }
+
+        .join-btn {
+            min-width: 130px;
+            justify-content: center;
+        }
+
+        body.light-mode .join-btn {
+            background: linear-gradient(145deg, #b0d0ff, #80a8e0);
+            border-color: #3388ff;
+        }
+
+        body.dark-mode .join-btn {
+            background: linear-gradient(145deg, #1a4a6a, #0a2a45);
+            border-color: #2ac0ff;
+        }
+
+        /* 搜索框 */
+        body.light-mode .search-box input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 100, 200, 0.5);
+            color: #003366;
+            box-shadow: 0 8px 20px -8px rgba(0, 50, 150, 0.2);
+        }
+
+        body.dark-mode .search-box input {
+            background: rgba(10, 20, 40, 0.6);
+            border: 1px solid rgba(0, 200, 255, 0.5);
+            color: #e0f0ff;
+            box-shadow: 0 8px 20px -8px rgba(0, 150, 255, 0.4);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            padding: 14px 25px;
+            width: 100%;
+            border-radius: 40px;
+            backdrop-filter: blur(8px);
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            outline: none;
+            height: 54px;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        body.light-mode .search-box input::placeholder {
+            color: #336699;
+        }
+
+        body.dark-mode .search-box input::placeholder {
+            color: rgba(200, 230, 255, 0.6);
+        }
+
+        .search-box input:focus {
+            border-color: #00a0ff;
+        }
+
+        body.light-mode .search-box input:focus {
+            background: white;
+            box-shadow: 0 0 25px rgba(0, 100, 255, 0.4);
+        }
+
+        body.dark-mode .search-box input:focus {
+            background: rgba(20, 30, 60, 0.7);
+            box-shadow: 0 0 25px #00a0ff;
+        }
+
+        /* 表格容器 */
+        body.light-mode .right-panel .table-container {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 100, 200, 0.3);
+            box-shadow: 0 0 0 1px rgba(0, 100, 200, 0.2) inset;
+        }
+
+        body.dark-mode .right-panel .table-container {
+            background: rgba(10, 15, 30, 0.4);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            box-shadow: 0 0 0 1px rgba(0, 200, 255, 0.1) inset;
+        }
+
+        .right-panel .table-container {
+            margin: 0;
+            border-radius: 30px;
+            overflow: auto;
+            padding: 0;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+            table-layout: fixed;
+        }
+
+        /* 表头 */
+        body.light-mode th {
+            background: rgba(0, 100, 200, 0.2);
+            color: #004488;
+            border-bottom: 2px solid #0066cc;
+            text-shadow: 0 0 5px rgba(0, 100, 200, 0.3);
+        }
+
+        body.dark-mode th {
+            background: rgba(0, 50, 100, 0.6);
+            color: #a0e0ff;
+            border-bottom: 2px solid #00a0ff;
+            text-shadow: 0 0 8px #00a0ff;
+        }
+
+        th {
+            padding: 18px 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 10;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        /* 表格行 */
+        body.light-mode td {
+            border-bottom: 1px solid rgba(0, 100, 200, 0.2);
+            color: #004080;
+        }
+
+        body.dark-mode td {
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+            color: #d0e5ff;
+        }
+
+        td {
+            padding: 16px 8px;
+            vertical-align: middle;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        /* 固定列宽 */
+        th:nth-child(1), td:nth-child(1) { width: 70px; }
+        th:nth-child(2), td:nth-child(2) { width: 180px; }
+        th:nth-child(3), td:nth-child(3) { width: 200px; }
+        th:nth-child(4), td:nth-child(4) { width: 80px; }
+        th:nth-child(5), td:nth-child(5) { width: 150px; }
+        th:nth-child(6), td:nth-child(6) { width: 100px; }
+        th:nth-child(7), td:nth-child(7) { width: 70px; }
+        th:nth-child(8), td:nth-child(8) { width: 80px; }
+
+        /* 收藏按钮 */
+        .favorite-star {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #ffaa00;
+            transition: all 0.2s;
+            padding: 5px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.light-mode .favorite-star {
+            color: #cc8800;
+        }
+
+        .favorite-star:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 10px #ffaa00;
+        }
+
+        .favorite-star.active {
+            color: #ffaa00;
+            text-shadow: 0 0 15px #ffaa00;
+        }
+
+        body.light-mode .favorite-star.active {
+            color: #ff8800;
+            text-shadow: 0 0 10px #ff8800;
+        }
+
+        /* 状态标签 */
+        body.light-mode .status-new { background: linear-gradient(145deg, #c0ffd0, #90e0a0); color: #006633; border-color: #22aa55; }
+        body.light-mode .status-update { background: linear-gradient(145deg, #c0e0ff, #90c0f0); color: #003366; border-color: #2277ff; }
+        body.light-mode .status-move { background: linear-gradient(145deg, #fff0c0, #e0c080); color: #664400; border-color: #cc8800; }
+        body.light-mode .status-delete { background: linear-gradient(145deg, #ffc0c0, #e09090); color: #660000; border-color: #cc4444; }
+
+        body.dark-mode .status-new { background: linear-gradient(145deg, #1a8a5a, #0a4a2a); color: #a0ffc0; border-color: #2aff8a; }
+        body.dark-mode .status-update { background: linear-gradient(145deg, #1a6aca, #0a2a7a); color: #b0e0ff; border-color: #2a9aff; }
+        body.dark-mode .status-move { background: linear-gradient(145deg, #ca9a1a, #7a4a0a); color: #ffe0a0; border-color: #ffb02a; }
+        body.dark-mode .status-delete { background: linear-gradient(145deg, #ca2a2a, #7a1a1a); color: #ffb0b0; border-color: #ff4a4a; }
+
+        .status-badge {
+            display: inline-block;
+            border-radius: 30px;
+            padding: 5px 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin: 2px 3px;
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 0 4px 10px -3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.3) inset;
+            backdrop-filter: blur(2px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        /* 高亮行 */
+        body.light-mode .row-update { background: rgba(0, 100, 255, 0.15) !important; }
+        body.light-mode .row-new { background: rgba(0, 200, 100, 0.15) !important; }
+        body.light-mode .row-move { background: rgba(255, 150, 0, 0.15) !important; }
+        body.light-mode .row-highlight-red { background: rgba(255, 50, 50, 0.25) !important; }
+
+        body.dark-mode .row-update { background: rgba(0, 100, 255, 0.25) !important; }
+        body.dark-mode .row-new { background: rgba(0, 200, 100, 0.2) !important; }
+        body.dark-mode .row-move { background: rgba(200, 150, 0, 0.25) !important; }
+        body.dark-mode .row-highlight-red { background: rgba(255, 50, 50, 0.4) !important; }
+
+        .row-highlight-red {
+            box-shadow: inset 0 0 0 2px #ff5e5e, 0 0 15px #ff0000;
+            transition: 0.2s;
+        }
+
+        .row-deleted td { color: #ff6b6b !important; }
+
+        /* 下载按钮 */
+        body.light-mode .download-btn {
+            background: linear-gradient(145deg, #c0e0ff, #90b8e0);
+            color: #003366;
+            border: 1px solid #2277ff;
+            box-shadow: 0 0 10px rgba(0, 50, 150, 0.3);
+        }
+
+        body.dark-mode .download-btn {
+            background: linear-gradient(145deg, #0a4a9a, #052a5a);
+            color: #b0e0ff;
+            border: 1px solid #2a8aff;
+            box-shadow: 0 0 15px #0a4a9a;
+        }
+
+        .download-btn {
+            padding: 6px 12px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: 0.2s;
+            cursor: pointer;
+            width: 70px;
+            text-align: center;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+        }
+
+        body.light-mode .download-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 100, 255, 0.5);
+        }
+
+        body.dark-mode .download-btn:hover {
+            box-shadow: 0 0 20px #2a8aff;
+        }
+
+        /* 展开菜单 */
+        body.light-mode .expand-menu {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 100, 200, 0.4);
+            box-shadow: 0 10px 30px -8px rgba(0, 50, 150, 0.3);
+        }
+
+        body.dark-mode .expand-menu {
+            background: rgba(15, 25, 45, 0.9);
+            border: 1px solid rgba(0, 200, 255, 0.4);
+            box-shadow: 0 10px 30px -8px rgba(0, 150, 255, 0.4);
+        }
+
+        .expand-menu {
+            width: 100%;
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .expand-menu-header {
+            background: rgba(0, 100, 200, 0.1);
+            color: #004488;
+            border-bottom: 1px solid rgba(0, 100, 200, 0.3);
+        }
+
+        body.dark-mode .expand-menu-header {
+            background: rgba(0, 50, 100, 0.3);
+            color: #00e0ff;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.3);
+        }
+
+        .expand-menu-header {
+            padding: 14px 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        body.light-mode .menu-category-header {
+            background: rgba(0, 0, 0, 0.03);
+            color: #004488;
+            border-bottom: 1px solid rgba(0, 100, 200, 0.2);
+        }
+
+        body.dark-mode .menu-category-header {
+            background: rgba(0, 0, 0, 0.2);
+            color: #a0d0ff;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+        }
+
+        .menu-category-header {
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+
+        body.light-mode .expand-menu-item {
+            color: #004080;
+            border-bottom: 1px solid rgba(0, 100, 200, 0.1);
+        }
+
+        body.dark-mode .expand-menu-item {
+            color: #c0e0ff;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.1);
+        }
+
+        .expand-menu-item {
+            padding: 12px 20px 12px 35px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.95rem;
+        }
+
+        body.light-mode .expand-menu-item:hover {
+            background: rgba(0, 100, 255, 0.1);
+            color: #002266;
+        }
+
+        body.dark-mode .expand-menu-item:hover {
+            background: rgba(0, 150, 255, 0.2);
+            color: white;
+            text-shadow: 0 0 8px #00a0ff;
+        }
+
+        .expand-menu-item:hover {
+            transform: translateX(8px);
+        }
+
+        body.light-mode .empty-message { color: #336699; }
+        body.dark-mode .empty-message { color: #80a0c0; }
+
+        /* 右下角按钮 */
+        body.light-mode .round-btn {
+            background: rgba(200, 220, 255, 0.7);
+            color: #004488;
+            border: 2px solid #3366cc;
+            box-shadow: 0 0 15px #3366cc;
+        }
+
+        body.dark-mode .round-btn {
+            background: rgba(10, 30, 60, 0.7);
+            color: #00e0ff;
+            border: 2px solid #00a0ff;
+            box-shadow: 0 0 25px #00a0ff;
+        }
+
+        .fixed-bottom {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+        .round-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            backdrop-filter: blur(10px);
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .round-btn:hover {
+            transform: scale(1.15);
+            filter: brightness(1.2);
+        }
+        body.light-mode .round-btn:hover {
+            box-shadow: 0 0 25px #3366cc;
+        }
+        body.dark-mode .round-btn:hover {
+            box-shadow: 0 0 35px #00e0ff;
+        }
+        #scrollTopBtn { opacity: 0; pointer-events: none; transition: 0.2s; }
+        #scrollTopBtn.show { opacity: 1; pointer-events: auto; }
+        #themeToggle { opacity: 1; pointer-events: auto; }
+
+        /* 页脚 */
+        body.light-mode .footer {
+            background: rgba(255, 255, 255, 0.6);
+            color: #336699;
+            border-top: 1px solid rgba(0, 100, 200, 0.3);
+            text-shadow: 0 0 5px rgba(0, 50, 150, 0.3);
+        }
+
+        body.dark-mode .footer {
+            background: rgba(10, 15, 30, 0.6);
+            color: #80a0c0;
+            border-top: 1px solid rgba(0, 200, 255, 0.3);
+            text-shadow: 0 0 5px #00a0ff;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px 20px 15px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+            width: 100%;
+            flex-shrink: 0;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+<!-- 标题栏 -->
+<div class="header-bar">
+    <div class="title-row">
+        <div class="header-left">
+            <select id="langSelect" class="lang-selector">
+                <option value="zh">简体中文</option>
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="ko">한국어</option>
+                <option value="ja">日本語</option>
+                <option value="de">Deutsch</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
+        
+        <h1 id="main-title">1.58-欧洲卡车模拟2-组合地图</h1>
+        
+        <div class="header-right">
+            <select id="versionSelect" class="ver-selector">
+                <option value="v1">精简版</option>
+            </select>
+        </div>
+    </div>
+    <div class="subtitle" id="sub-title"></div>
+</div>
+
+<!-- 左右分栏主内容 -->
+<div class="main-content">
+    <!-- 左侧面板 -->
+    <div class="left-panel">
+        <!-- 统计按钮区域 -->
+        <div class="left-section">
+            <div class="left-section-title"><i class="fas fa-chart-pie"></i> <span id="statsTitle">模组统计</span></div>
+            <div class="left-stats" id="statsRow">
+                <button class="stat-btn" id="statAll"><i class="fas fa-cube"></i> <span id="statAllText">全部模组</span> <span id="totalMods">0</span></button>
+                <button class="stat-btn" id="statUpdate"><i class="fas fa-sync-alt"></i> <span id="statUpdateText">更新</span> <span id="updateCount">0</span></button>
+                <div id="updateMenu" class="expand-menu" style="display: none;"></div>
+                
+                <button class="stat-btn" id="statNew"><i class="fas fa-plus-circle"></i> <span id="statNewText">新增</span> <span id="newCount">0</span></button>
+                <div id="newMenu" class="expand-menu" style="display: none;"></div>
+                
+                <button class="stat-btn" id="statMove"><i class="fas fa-truck"></i> <span id="statMoveText">移动</span> <span id="moveCount">0</span></button>
+                <div id="moveMenu" class="expand-menu" style="display: none;"></div>
+                
+                <button class="stat-btn" id="statDelete"><i class="fas fa-trash-alt"></i> <span id="statDeleteText">删除</span> <span id="deleteCount">0</span></button>
+                <div id="deleteMenu" class="expand-menu" style="display: none;"></div>
+                
+                <!-- 收藏模组按钮 -->
+                <button class="stat-btn" id="statFavorites"><i class="fas fa-star"></i> <span id="statFavoritesText">收藏模组</span> <span id="favoritesCount">0</span></button>
+                <div id="favoritesMenu" class="expand-menu" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- 快捷操作区域 -->
+        <div class="left-section">
+            <div class="left-section-title"><i class="fas fa-tools"></i> <span id="quickOpsTitle">快捷操作</span></div>
+            <div class="left-actions">
+                <div style="display: flex; flex-direction: column; width: 100%; gap: 5px;">
+                    <button class="action-btn" id="downloadAllBtn"><i class="fas fa-download"></i> <span id="btnDownloadAll">一键下载全部模组</span> <i class="fas fa-chevron-down" style="margin-left: auto;"></i></button>
+                    <div id="downloadAllMenu" class="expand-menu" style="display: none;">
+                        <div class="expand-menu-item" id="downloadPack1"><i class="fas fa-file-archive"></i> 模组包①</div>
+                        <div class="expand-menu-item" id="downloadPack2"><i class="fas fa-file-archive"></i> 模组包②</div>
+                    </div>
+                </div>
+                <a href="#" class="action-btn" id="backupSave" target="_blank"><i class="fas fa-save"></i> <span id="btnBackup">免排序存档</span></a>
+                <a href="#" class="action-btn" id="sortGuide" target="_blank"><i class="fas fa-map-signs"></i> <span id="btnSortGuide">排序图</span></a>
+                
+                <button class="action-btn" id="updateLogBtn"><i class="fas fa-history"></i> <span id="btnUpdateLog">更新日志</span></button>
+                <div id="updateLogMenu" class="expand-menu" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧面板 -->
+    <div class="right-panel">
+        <!-- 搜索框行 -->
+        <div class="search-row">
+            <a href="https://qm.qq.com/q/BnCNeQYBUW" class="join-btn" id="joinUs" target="_blank"><i class="fas fa-users"></i> <span id="btnJoinUs">加入我们</span></a>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 按模组名/状态/更新时间搜索...">
+            </div>
+            
+            <!-- 搜索历史下拉菜单 -->
+            <div id="searchHistoryDropdown" class="search-history-dropdown" style="display: none;"></div>
+        </div>
+
+        <!-- 模组表格容器 -->
+        <div class="table-container" id="tableContainer">
+            <table id="modTable">
+                <thead>
+                    <tr>
+                        <th id="thIndex">序号</th>
+                        <th id="thModName">模组名</th>
+                        <th id="thFileName">文件名</th>
+                        <th id="thVersion">版本</th>
+                        <th id="thStatus">状态</th>
+                        <th id="thUpdateTime">更新时间</th>
+                        <th id="thFavorite">收藏</th>
+                        <th id="thDownload">下载</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<div class="footer" id="footerText">
+    欧洲卡车模拟2 组合地图模组排序列表 - 本列表仅供参考，实际使用请根据个人需求调整<br>
+    © 2026 瑆泽, 初一爱笑啊 - 所有模组版权归原作者所有
+</div>
+
+<!-- 右下角按钮 -->
+<div class="fixed-bottom">
+    <button class="round-btn" id="scrollTopBtn"><i class="fas fa-rocket"></i></button>
+    <button class="round-btn" id="themeToggle"><i class="fas fa-sun"></i></button>
+</div>
+
+<script>
+    (function(){
+        // ==================== 数据集中管理区域 ====================
+        
+        /**
+         * 模组数据 - 按版本分类
+         * 修改说明：
+         * 1. name: 模组显示名称
+         * 2. file: 实际文件名
+         * 3. version: 版本号
+         * 4. status: 状态数组，可包含 "新增"/"更新"/"移动"/"删除" 中的一个或多个
+         * 5. updated: 更新时间 (YYYY-MM-DD格式)
+         * 6. link: 下载链接
+         */
+        const modDataVersions = {
+    "v1": [
+        {
+            "name": "ETS2 Global Background Map",
+            "file": "ETS2 Global Background Map",
+            "version": "2.6",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/77a397ee667b"
+        },
+        {
+            "name": "组合地图汉化",
+            "file": "[汉化]Chinese Localization",
+            "version": "1.7",
+            "status": [
+                "新增"
+            ],
+            "updated": "2026-03-10",
+            "link": "https://truckymods.io/euro-truck-simulator-2/map-patches/ets2-chinese-localization-454568#nav-comments"
+        },
+        {
+            "name": "FullScreen Maps server (ETS2)",
+            "file": "gmc.fullscreen.maps.server.ets2",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/4ef46dbc7cee"
+        },
+        {
+            "name": "Remover Ferries by Quper",
+            "file": "RealisticAddonFerryQuper",
+            "version": "1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://steamcommunity.com/sharedfiles/filedetails/?id=3358041900"
+        },
+        {
+            "name": "RU Localizer and Zoom fix 4.0.0",
+            "file": "RussianMapLocalizerByQuperSimulator",
+            "version": "4.0.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/5d299f511785"
+        },
+        {
+            "name": "Original Loading Screen server (ETS2)",
+            "file": "gmc.original_loading_screen.server.ets2",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/86b4516f4ffe"
+        },
+        {
+            "name": "Original Map Icons (ETS2)",
+            "file": "gmc.original.map.icons.ets2",
+            "version": "1.56-1.0.0",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/5ca9fc061c45"
+        },
+        {
+            "name": "RusMap LP fix",
+            "file": "RusMap license plates fix",
+            "version": "2.55",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/926a2ffadf43"
+        },
+        {
+            "name": "Ultimate Map Combo Fix (ProMods Patch)",
+            "file": "gmc.ultimate.map_combo_fix.promods_patch",
+            "version": "1.57-1.3.2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ed1a93e97861"
+        },
+        {
+            "name": "Ultimate Map Combo Fix",
+            "file": "gmc.ultimate.map_combo_fix",
+            "version": "1.57-1.7.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/b491bdef6191"
+        },
+        {
+            "name": "Swedish islands Map 2.2",
+            "file": "SwedishIslandsMap_v2.2",
+            "version": "1.57",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://share.feijipan.com/s/Uz1cOK6q"
+        },
+        {
+            "name": "Abkhazia Map v.1.2",
+            "file": "Abkh Map v.1.2",
+            "version": "1.2",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/1d0501cfb284"
+        },
+        {
+            "name": "158Hybrid2v3",
+            "file": "158Hybrid2v3",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://share.feijipan.com/s/kQ1cOjbn"
+        },
+        {
+            "name": "ROEX50SR131 RC",
+            "file": "ROEX50SR131",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://share.feijipan.com/s/8L1cPOwb"
+        },
+        {
+            "name": "ROEX50Core",
+            "file": "ROEX50core",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/d0a657bd83d1"
+        },
+        {
+            "name": "ROEX50Main1",
+            "file": "ROEX50main1",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/7f2e27334911"
+        },
+        {
+            "name": "ROEX50Main2",
+            "file": "ROEX50main2",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/da2b1570495f"
+        },
+        {
+            "name": "ROEX50Main3",
+            "file": "ROEX50main3",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/ee48e724e034"
+        },
+        {
+            "name": "ROEX50Main4",
+            "file": "ROEX50main4",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/9b07d25cc96e"
+        },
+        {
+            "name": "Off the Grid Russia - Northern Open Spaces RC",
+            "file": "Off the Grid Russia - Northern Open Spaces RC",
+            "version": "1.5",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/fb63199014b8"
+        },
+        {
+            "name": "3 in 1 Northern Open Spaces RC",
+            "file": "3 in 1 Northern Open Spaces RC1.4",
+            "version": "1.4",
+            "status": [
+                "更新"
+            ],
+            "updated": "2026-03-10",
+            "link": "https://pan.quark.cn/s/6b184a63c8ec"
+        },
+        {
+            "name": "Northern_open_spaces",
+            "file": "Northern_Open_Spaces_v13.9_1.58",
+            "version": "13.9",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/3eff564efa85"
+        },
+        {
+            "name": "Ural Map 1.7",
+            "file": "uralmap17",
+            "version": "1.7",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/8dfb1d26e0e5"
+        },
+        {
+            "name": "NNMap RusMap (Ald Ver) RC Ulyanovsk Fix",
+            "file": "gmc.nnmap.rusmap.rc.ulyanovsk.fix",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/eacc8de9102f"
+        },
+        {
+            "name": "Ulyanovsk Map 1.0",
+            "file": "ulmap10",
+            "version": "1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/4f4b9141f669"
+        },
+        {
+            "name": "RusCentryMap - Kirov Map - SibirMap RC",
+            "file": "RusCentryMap - Kirov Map - SibirMap RC",
+            "version": "1.4",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/bc58102ae5a1"
+        },
+        {
+            "name": "RusCentryMap",
+            "file": "RusCentryMap",
+            "version": "1.8",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/b16b89277adb"
+        },
+        {
+            "name": "KirovMap 1.7 FREE",
+            "file": "KirovMap_17_FREE",
+            "version": "1.58",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/942faa735d2b"
+        },
+        {
+            "name": "M12 VOSTOK - Rusmap RC HOTFIX(Aldi)",
+            "file": "M12VOSTOK-RusmapRC-hotfix",
+            "version": "1.0-3.3-1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/67ebc4988352"
+        },
+        {
+            "name": "M12 VOSTOK - Rusmap RC (Aldi)",
+            "file": "M12VOSTOK-RusmapRC",
+            "version": "3.3-1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/21a5dcc3ca0f"
+        },
+        {
+            "name": "RcNNmapxM12",
+            "file": "RCNNMapM12",
+            "version": "1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/103cd5aa0899"
+        },
+        {
+            "name": "M12 Sibirmap 2.10.2 RC",
+            "file": "M12_Sibirmap_rc",
+            "version": "1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/78c90df00a97"
+        },
+        {
+            "name": "M12_vostok_V.3.0",
+            "file": "M12_vostok_V.3.0",
+            "version": "3",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/260533794aa0"
+        },
+        {
+            "name": "NNMap RusMap (Ald Ver) RC",
+            "file": "gmc.nnmap.rusmap_ald_ver.rc",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/60bb96418cf6"
+        },
+        {
+            "name": "NNmap 1.3.0",
+            "file": "nnmap130",
+            "version": "1.3.0",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/7043e2a4d0a5"
+        },
+        {
+            "name": "Road to Caucasus - RusMap[Aldimator] RC v.1.5.1",
+            "file": "RTC RusMapAld RC v.1.5.1",
+            "version": "1.5.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/711d86463eab"
+        },
+        {
+            "name": "Boksitogorsk - Vyshny Volochek RC (RM Aldimator)",
+            "file": "Boksitogorsk - Vyshny Volochek RC (RM Aldimator) 1.2",
+            "version": "1.2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/5d0981f50b28"
+        },
+        {
+            "name": "RusMap_Def",
+            "file": "RusMap_Def",
+            "version": "2.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/934a53b9118f"
+        },
+        {
+            "name": "RusMap_Map",
+            "file": "RusMap_Map",
+            "version": "2.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/65806205edb4"
+        },
+        {
+            "name": "RusMap_Models",
+            "file": "RusMap_Models",
+            "version": "2.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/d9daa20b9a15"
+        },
+        {
+            "name": "EurAfrica ProMods Maghreb Fix",
+            "file": "gmc.eurafrica.maghreb.fix",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/953e6d555a7f"
+        },
+        {
+            "name": "EurAfrica ProMods Fix",
+            "file": "gmc.eurafrica.promods.fix",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/cd9e25a14141"
+        },
+        {
+            "name": "Eurafrica RC Beyond",
+            "file": "_Eurafrica_RC_Beyond",
+            "version": "currend",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/f8b107f30bf0"
+        },
+        {
+            "name": "_Eurafrica_3.9_F1",
+            "file": "_Eurafrica_3.9_F1",
+            "version": "3.9",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/cb4ed864f000"
+        },
+        {
+            "name": "_Eurafrica_3.9_F2",
+            "file": "_Eurafrica_3.9_F2",
+            "version": "3.9",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ebb7cd8b8318"
+        },
+        {
+            "name": "_Eurafrica_3.9_F3",
+            "file": "_Eurafrica_3.9_F3",
+            "version": "3.9",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/5b3d8884fc7c"
+        },
+        {
+            "name": "_Eurafrica_3.9_F4",
+            "file": "_Eurafrica_3.9_F4",
+            "version": "3.9",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/c7fa129b5c15"
+        },
+        {
+            "name": "SFIGC - Promods Addon",
+            "file": "SFIGC - a ProMods Addon",
+            "version": "0.6",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/4fdac227f86d"
+        },
+        {
+            "name": "Cape Verde Map",
+            "file": "cape_verde_map",
+            "version": "1.0.0",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/7f474b77cff5"
+        },
+        {
+            "name": "Santiago de Compostela aÃ±adido",
+            "file": "santiago13",
+            "version": "13",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/7120a91dafef"
+        },
+        {
+            "name": "Portugal Rebuild 0.1.6.2 Promods Addon",
+            "file": "Portugal Rebuild v0.1.6.2 Promods Addon",
+            "version": "0.1.6.2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ad226a4cce7b"
+        },
+        {
+            "name": "Bulgaria in Focus",
+            "file": "bginfocus-all-v1.35",
+            "version": "1.35",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/89913feb0ec7"
+        },
+        {
+            "name": "Senj Map Add-on (Promods Compatible)",
+            "file": "senj_map_addon",
+            "version": "1.4",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/7892a9036feb"
+        },
+        {
+            "name": "WBPD Fix for ProMods 2.81",
+            "file": "wbpd_fix",
+            "version": "1.3",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/b95ed27391c8"
+        },
+        {
+            "name": "West Balkans Path-breaker\\xe2\\x80\\x99s Direction (WBPD) Map Mod",
+            "file": "wbpd_addon_map_main",
+            "version": "5.2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ec291dee3e52"
+        },
+        {
+            "name": "The Cold North Map",
+            "file": "sweden",
+            "version": "0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/910829a55687"
+        },
+        {
+            "name": "House south of \\xc3\\x96stersund",
+            "file": "nhhousesw",
+            "version": "2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/fcd403be0628"
+        },
+        {
+            "name": "V\\xc3\\xa4nern Project",
+            "file": "e45",
+            "version": "1.3",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/75f45b2635f9"
+        },
+        {
+            "name": "Sverige S\\xc3\\xb6dra Expansion",
+            "file": "sverige_s\\xc3\\xb6dra_expansion_byNacho",
+            "version": "1.2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/9242de5d4d4a"
+        },
+        {
+            "name": "Latvia rebuild v1.28 for PM 2.81",
+            "file": "latvia-rebuild-v1_28-for-PM-v2_81",
+            "version": "1.28",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/94242f90fb3a"
+        },
+        {
+            "name": "Slovensko+ v4.4 - Def",
+            "file": "Slovensko+ v4.4 - Def",
+            "version": "4.4",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/01eeaab1e293"
+        },
+        {
+            "name": "Slovensko+ v4.4 - Map",
+            "file": "Slovensko+ v4.4 - Map",
+            "version": "4.4",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/7bb2a640c10b"
+        },
+        {
+            "name": "Promods Barcelona EXP",
+            "file": "PmBarcelonaExp",
+            "version": "2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ce14c0d90385"
+        },
+        {
+            "name": "Iberia Map RW FIX",
+            "file": "Iberia Map RW FIX",
+            "version": "1.4",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/eded85a8dbb0"
+        },
+        {
+            "name": "Iberia Promods Map RW v1.39",
+            "file": "promods_eu_281_ib_rw_158_v139",
+            "version": "1.39",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/d57cea0c3a52"
+        },
+        {
+            "name": "Sud de France & Promods Fix",
+            "file": "S2F & Promods Fix v1.1.1 by Adyox",
+            "version": "1.1.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/ddbd7f69eccd"
+        },
+        {
+            "name": "Sud de France",
+            "file": "_v2.0.2b__PUBLIC_Sud_de_France_by_Charly",
+            "version": "2.0.2b",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/e02f7c7a4cf0"
+        },
+        {
+            "name": "Trucksmap UK v1.4.1.58",
+            "file": "Trucksmap UK 1.4.pa1.1.58.scs",
+            "version": "1.4.1.58",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/577275f1dbfd"
+        },
+        {
+            "name": "SJMap - ProMods FIX",
+            "file": "SJMap - ProMods FIX",
+            "version": "1.4",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ddc1215599b9"
+        },
+        {
+            "name": "SJMap",
+            "file": "ntrl71_sjmap",
+            "version": "R7",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/bacad836ebc7"
+        },
+        {
+            "name": "Java Road Revolution (JRR) Def & Map",
+            "file": "JRR_Def&Map_DF-BG",
+            "version": "0.91",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/bb40ed8a9645"
+        },
+        {
+            "name": "Java Road Revolution (JRR) Assets & Models 1",
+            "file": "JRR_Assets&Models1",
+            "version": "0.91",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/e136c5917ca1"
+        },
+        {
+            "name": "Java Road Revolution (JRR) Assets & Models 2",
+            "file": "JRR_Assets&Models2",
+            "version": "0.91",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/f1c327f797e9"
+        },
+        {
+            "name": "Beyond Africa Extended Fix",
+            "file": "gmc.beyond.africa_ext.fix",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ea6de1fa28e0"
+        },
+        {
+            "name": "Red Sea Map + Beyond PMME RC + Beyond PM RC & Fix",
+            "file": "gmc.red_sea_map.beyond_pmme_rc.beyond_pm_rc_fix",
+            "version": "1.58-1.0.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/426f7cd6da54"
+        },
+        {
+            "name": "ProMods The Great Steppe - Beyond Road Connection",
+            "file": "gmc.pm_tgs.beyond.rc",
+            "version": "1.57-1.0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/5f50ee4ea4c8"
+        },
+        {
+            "name": "Kazakhstan - Beyond RC",
+            "file": "Kazakhstan-BeyondRC",
+            "version": "1.4-1.58",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/79b4d855eefd"
+        },
+        {
+            "name": "Trans-Siberia Beyond RC",
+            "file": "Trans-Siberia_Beyond_RC",
+            "version": "2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/1761526f5bef"
+        },
+        {
+            "name": "Beyond Fix",
+            "file": "gmc.beyond.fix",
+            "version": "1.58-1.2.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/f1968d522b7f"
+        },
+        {
+            "name": "Beyond by TerraMaps 1",
+            "file": "Beyond_by_TerraMaps_1",
+            "version": "V8",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/5935e4b866b8"
+        },
+        {
+            "name": "Beyond by TerraMaps 2",
+            "file": "Beyond_by_TerraMaps_2",
+            "version": "V8",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/e3e1e29d0fa1"
+        },
+        {
+            "name": "Beyond by TerraMaps 3",
+            "file": "Beyond_by_TerraMaps_3",
+            "version": "V8",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/9ca1285c7427"
+        },
+        {
+            "name": "Beyond by TerraMaps 4",
+            "file": "Beyond_by_TerraMaps_4",
+            "version": "V8",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/b7a0705d8b69"
+        },
+        {
+            "name": "Beyond by TerraMaps 5",
+            "file": "Beyond_by_TerraMaps_5",
+            "version": "V8",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/89e876c69451"
+        },
+        {
+            "name": "Horn of Africa - Def/Map",
+            "file": "hoa_defmap",
+            "version": "1.1.5",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/ac6a4724ef66"
+        },
+        {
+            "name": "Horn of Africa - Assets/Models 1",
+            "file": "hoa_assets1",
+            "version": "1.1.5",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/a2f46d2548f9"
+        },
+        {
+            "name": "Horn of Africa - Assets/Models 2",
+            "file": "hoa_assets2",
+            "version": "1.1.5",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/cd201e060973"
+        },
+        {
+            "name": "ProMods Maghreb Fix",
+            "file": "gmc.maghreb.fix",
+            "version": "1.58-1.0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/8349e8022e42"
+        },
+        {
+            "name": "ProMods Maghreb (Europe Connector)",
+            "file": "cnx-pm-eu-v281-ma-v101",
+            "version": "1.0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/afd9de11fb9b"
+        },
+        {
+            "name": "ProMods Maghreb (Def & Map Package)",
+            "file": "promods-ma-defmap-v101",
+            "version": "1.0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/2917bc63803a"
+        },
+        {
+            "name": "ProMods Maghreb (Models Package)",
+            "file": "promods-ma-models-v101",
+            "version": "1.0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/27c6e4e5afdb"
+        },
+        {
+            "name": "ProMods Maghreb (Assets Package)",
+            "file": "promods-ma-assets-v101",
+            "version": "1.0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/1775df7ebe37"
+        },
+        {
+            "name": "Syria - a ProMods Addon",
+            "file": "Syria - a ProMods Addon",
+            "version": "1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/8195e98aa807"
+        },
+        {
+            "name": "ProMods Middle-East Add-on (Def & Map Package)",
+            "file": "promods-me-defmap-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/9a0a68962fea"
+        },
+        {
+            "name": "ProMods Middle-East Add-on (Assets Package)",
+            "file": "promods-me-assets-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/e9ce5b870f2f"
+        },
+        {
+            "name": "ProMods Definition Package",
+            "file": "promods-eu-def-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/8aab7f3e3f85"
+        },
+        {
+            "name": "ProMods Map Package",
+            "file": "promods-eu-map-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/1dd061a5982c"
+        },
+        {
+            "name": "ProMods Assets Package",
+            "file": "promods-eu-assets-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/9d6b857a86eb"
+        },
+        {
+            "name": "ProMods Models Package 1",
+            "file": "promods-eu-model1-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/f62fdbf80b60"
+        },
+        {
+            "name": "ProMods Models Package 2",
+            "file": "promods-eu-model2-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/d46472beec43"
+        },
+        {
+            "name": "ProMods Models Package 3",
+            "file": "promods-eu-model3-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/69775d7e273c"
+        },
+        {
+            "name": "ProMods Media Package",
+            "file": "promods-eu-media-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/98d48fae84f7"
+        },
+        {
+            "name": "ProMods DLC Support Package",
+            "file": "promods-eu-dlcsupport-v281",
+            "version": "2.81",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/4fc5a1c85320"
+        },
+        {
+            "name": "Baikal map",
+            "file": "Baikal Map",
+            "version": "2.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/d38ab6140c58"
+        },
+        {
+            "name": "Khabarovsk Map",
+            "file": "Khabarovsk Map",
+            "version": "1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/4a96aa4af82d"
+        },
+        {
+            "name": "Sakhalin Map - Amur Map FIX [Hotfix]",
+            "file": "Sakhalin Map - Amur Map FIX - Hotfix",
+            "version": "1.2.0",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/8b9de5e0fefc"
+        },
+        {
+            "name": "Sakhalin Map",
+            "file": "SakhalinMap 1.1",
+            "version": "1.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/2c5d7369f3f7"
+        },
+        {
+            "name": "Trans-Siberia Amur Map RC",
+            "file": "Trans-Siberia Amur Map RC",
+            "version": "3.0.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/30fecfe9e1de"
+        },
+        {
+            "name": "AmurMap1.0.1",
+            "file": "amurmap101",
+            "version": "1.0.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/1a28d3ff9718"
+        },
+        {
+            "name": "Trans-Siberia Sibirmap Free RC",
+            "file": "Trans-Siberia SibirMap Free RC",
+            "version": "3.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/b2282da4a56c"
+        },
+        {
+            "name": "Trans-Siberia Altai Map RC",
+            "file": "Trans-Siberia_Altai_Map_RC",
+            "version": "1.9",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/ab6615091799"
+        },
+        {
+            "name": "Trans-Siberia Far-East Russia RC",
+            "file": "Trans-Siberia_Far_East_Russia_RC",
+            "version": "3.0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/eebc13e7b679"
+        },
+        {
+            "name": "Trans-Siberia Off the Grid RC",
+            "file": "Trans-Siberia Off the Grid RC",
+            "version": "3.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/2def359ffdec"
+        },
+        {
+            "name": "Fix.Trans-Siberian Truckway",
+            "file": "Fix.Trans-Siberian Truckway",
+            "version": "1.58.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/b0536c51ad82"
+        },
+        {
+            "name": "Trans-Siberian Truckway",
+            "file": "Trans-Siberian Truckway",
+            "version": "3.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/d024e94b37fd"
+        },
+        {
+            "name": "FER - CHUKOTKA ADDON RC",
+            "file": "FER - CHUKOTKA RC",
+            "version": "v2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/5a857de0d55b"
+        },
+        {
+            "name": "Chukotka - Far East Russia Add-on",
+            "file": "FER Chukotka ADDON v1",
+            "version": "v1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/66cbd5497034"
+        },
+        {
+            "name": "Far East Russia",
+            "file": "Far East Russia Alpha 30 FIX1",
+            "version": "Alpha 30 Fix",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/a345a2ca3935"
+        },
+        {
+            "name": "Off the Grid - Special Transport",
+            "file": "otgr_st",
+            "version": "3.4",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/e2f0ce9c26c0"
+        },
+        {
+            "name": "Off the Grid - Def/Map",
+            "file": "otgr_defmap",
+            "version": "3.4",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/108c5b259562"
+        },
+        {
+            "name": "Off the Grid - Assets/Models",
+            "file": "otgr_assets",
+            "version": "3.4",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/c0c1f301428b"
+        },
+        {
+            "name": "Road to Caucasus - Promods The Great Steppe RC",
+            "file": "RTC TGS RC v.1.9",
+            "version": "1.9",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/7877d2568935"
+        },
+        {
+            "name": "Road to Caucasus Version 2.4.1",
+            "file": "RTC v.2.4.1",
+            "version": "2.4.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/9e7aa5e2c652"
+        },
+        {
+            "name": "SRmap UNOFFICIAL",
+            "file": "SRMod13_1_58(UNOFFICIAL)",
+            "version": "13.1",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/b2a2eb381935"
+        },
+        {
+            "name": "Volga Map - Promods T.G.S RC",
+            "file": "VolgaMap-PmTGS-RC",
+            "version": "1.3-1.57",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/d3afee0624b6"
+        },
+        {
+            "name": "PM TGS - Kazakhstan RC + Pm TGS Fix",
+            "file": "KazakhstanTgsRC",
+            "version": "0.7-1.58",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/99b90f66f4c3"
+        },
+        {
+            "name": "Kazakhstan - Altai RC",
+            "file": "KazakhstanAltaiRC",
+            "version": "1.0-1.58",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/b7c20d9f82b5"
+        },
+        {
+            "name": "Kazakhstan - Sibir RC",
+            "file": "Kazakhstan-SibirRC",
+            "version": "1.5-1.58",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/864760c7d19f"
+        },
+        {
+            "name": "SibirMap traffic only in RU",
+            "file": "SibirMap_traffic_RUonly",
+            "version": "1.2",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/8e8acd82be6f"
+        },
+        {
+            "name": "SibirMap 2.11 cargo_fix",
+            "file": "SibirMap_cargo_fix",
+            "version": "2.11",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/f1d99d05caa7"
+        },
+        {
+            "name": "ProMods The Great Steppe (Def & Map Package)",
+            "file": "promods-tgs-defmap-v160",
+            "version": "1.6.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/167af2f61a57"
+        },
+        {
+            "name": "ProMods The Great Steppe (Assets Package)",
+            "file": "promods-tgs-assets-v160",
+            "version": "1.6.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/e7274843b25a"
+        },
+        {
+            "name": "VolgaMap 1.5.3",
+            "file": "VolgaMap_1_5_3",
+            "version": "1.5.3",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/4bbe32ab79a3"
+        },
+        {
+            "name": "Altai Map",
+            "file": "Altai_Map 1.7.2",
+            "version": "1.7.2",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/598f43164286"
+        },
+        {
+            "name": "SibirMap 2.12.0 Free Version for 1.58",
+            "file": "sibirmap212fv_for158",
+            "version": "2.12.0 FV",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/cdc31d8f1a9e"
+        },
+        {
+            "name": "Heart of Africa",
+            "file": "Africa_DefMap158",
+            "version": "0.2.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/1fce5e108d61"
+        },
+        {
+            "name": "Heart of Africa Assets",
+            "file": "Africa_AssetsModels158",
+            "version": "0.2.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/4938a0d14a1a"
+        },
+        {
+            "name": "West Africa - Africa Extended RC",
+            "file": "West Africa - Africa Extended RC",
+            "version": "1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/bd1f7be95981"
+        },
+        {
+            "name": "Africa Extended",
+            "file": "africa_extended",
+            "version": "1.3",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/cb3cc3c414af"
+        },
+        {
+            "name": "West Africa",
+            "file": "west_africa",
+            "version": "0.03",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/0a479c1969ed"
+        },
+        {
+            "name": "Republic of Kazakhstan FIX",
+            "file": "Republic of Kazakhstan FIX",
+            "version": "1.6",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/e89efcae8325"
+        },
+        {
+            "name": "Republic of Kazakhstan def",
+            "file": "kaz def",
+            "version": "",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/24258822c22d"
+        },
+        {
+            "name": "Republic of Kazakhstan model",
+            "file": "kaz model",
+            "version": "",
+            "status": [],
+            "updated": "2026-02-26",
+            "link": "https://pan.quark.cn/s/282c2e9e2973"
+        },
+        {
+            "name": "Canada Map FIX",
+            "file": "Canada Map FIX",
+            "version": "1.4",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/d8dce11d41ce"
+        },
+        {
+            "name": "def canada v 0.2.5",
+            "file": "Canada v-0.2.5-def",
+            "version": "0.2.5",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/9a02720aab41"
+        },
+        {
+            "name": "Project Caribbean",
+            "file": "Project Caribbean",
+            "version": "1.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/ac1fd8b7d66f"
+        },
+        {
+            "name": "Maldives Map 0.1",
+            "file": "maldives",
+            "version": "0.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/e560071f44b2"
+        },
+        {
+            "name": "Project Comoros 1.58-1.0",
+            "file": "xiaoan.pjcom",
+            "version": "1.58-1.0",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/0c59d477ed80"
+        },
+        {
+            "name": "Nauru Map",
+            "file": "Nauru Map (1)",
+            "version": "1.1",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/fb0e1222b4b9"
+        },
+        {
+            "name": "Antarctica Map 0.8 DEF",
+            "file": "mod_antarctica_def.0.8",
+            "version": "0.8",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/1b282069dbab"
+        },
+        {
+            "name": "Antarctica Map 0.8 MAP",
+            "file": "mod_antarctica_map.0.8",
+            "version": "0.8",
+            "status": [],
+            "updated": "2026-03-04",
+            "link": "https://pan.quark.cn/s/eb391f42ca3b"
+        }
+    ]
+};
+
+        /**
+         * 按钮链接 - 按版本分类
+         * 修改说明：
+         * downloadPack1: 模组包①下载链接
+         * downloadPack2: 模组包②下载链接  
+         * backupSave: 免排序存档链接
+         * sortGuide: 排序图链接
+         */
+        const versionLinks = {
+            v1: {  // 精简版
+                downloadPack1: "https://pan.quark.cn/s/2d8eca3ea118",
+                downloadPack2: "https://share.feijipan.com/s/2g1d6mEo",
+                backupSave: "https://pan.quark.cn/s/9d10dcc0a9e7",
+                sortGuide: "https://pan.quark.cn/s/468d5ea9a140"
+            }
+        };
+
+        // ==================== 版本日期配置 ====================
+        const versionDates = {
+    "v1": {
+        "updateDate": "2026-03-10",
+        "importDate": "2026-03-11"
+    }
+};
+
+        // ==================== 以下代码逻辑保持不变 ====================
+        
+        // 加载保存的状态
+        function loadSavedState() {
+            const saved = localStorage.getItem('ets2_mod_state_full_lang');
+            if (saved) { try { return JSON.parse(saved); } catch(e){} }
+            return { language: 'zh', version: 'v1', theme: 'dark', favorites: [], searchHistory: [] };
+        }
+
+        function saveState() {
+            const state = {
+                language: currentLanguage,
+                version: currentVersion,
+                theme: document.body.classList.contains('dark-mode') ? 'dark' : 'light',
+                favorites: favorites,
+                searchHistory: searchHistory
+            };
+            localStorage.setItem('ets2_mod_state_full_lang', JSON.stringify(state));
+        }
+
+        const savedState = loadSavedState();
+        let currentVersion = savedState.version || 'v1';
+        let modList = [...(modDataVersions[currentVersion] || modDataVersions.v1)];
+        let currentLanguage = savedState.language || 'zh';
+        const savedTheme = savedState.theme || 'dark';
+        
+        // 收藏夹数据
+        let favorites = savedState.favorites || [];
+        
+        // 搜索历史数据
+        let searchHistory = savedState.searchHistory || [];
+        let searchHistoryVisible = false;
+
+        // 作者信息函数
+        function getAuthors() { 
+            const authors = {
+                zh: "瑆泽、初一爱笑啊、BGYdook",
+                en: "Xingze, Chuyi, BGYdook",
+                ru: "Синцзэ, Чуи, BGYdook",
+                ko: "싱저, 추이, BGYdook",
+                ja: "シンツェ, チューイ, BGYdook",
+                de: "Xingze, Chuyi, BGYdook",
+                fr: "Xingze, Chuyi, BGYdook"
+            };
+            return authors[currentLanguage] || authors.zh;
+        }
+        
+        function getUpdateDate() { 
+            return versionDates[currentVersion]?.updateDate || "2026-03-10"; 
+        }
+        
+        function getImportDate() { 
+            return versionDates[currentVersion]?.importDate || "2026.03.10"; 
+        }
+        
+        function buildSubtitle() { 
+            const prefix = {
+                zh: "作者：",
+                en: "Authors: ",
+                ru: "Авторы: ",
+                ko: "제작: ",
+                ja: "作者: ",
+                de: "Autoren: ",
+                fr: "Auteurs: "
+            };
+            const updatePrefix = {
+                zh: "更新日期：",
+                en: "Updated: ",
+                ru: "Обновлено: ",
+                ko: "업데이트: ",
+                ja: "更新日: ",
+                de: "Aktualisiert: ",
+                fr: "Mise à jour: "
+            };
+            const importPrefix = {
+                zh: "数据导入：",
+                en: "Data: ",
+                ru: "Импорт: ",
+                ko: "데이터: ",
+                ja: "取込: ",
+                de: "Import: ",
+                fr: "Import: "
+            };
+            return `${prefix[currentLanguage] || prefix.zh}${getAuthors()}   【${updatePrefix[currentLanguage] || updatePrefix.zh}${getUpdateDate()}，${importPrefix[currentLanguage] || importPrefix.zh}${getImportDate()}】`;
+        }
+
+        // 完整翻译字典
+        const translations = {
+            zh: { 
+                title:"1.58-欧洲卡车模拟2-组合地图", 
+                statsTitle:"模组统计",
+                quickOpsTitle:"快捷操作",
+                statAll:"全部模组", 
+                statUpdate:"更新", 
+                statNew:"新增", 
+                statMove:"移动", 
+                statDelete:"删除",
+                statFavorites:"收藏模组",
+                btnDownloadAll:"一键下载全部模组", 
+                btnBackup:"免排序存档", 
+                btnSortGuide:"排序图", 
+                btnUpdateLog:"更新日志",
+                btnJoinUs:"加入我们",
+                thIndex:"序号", 
+                thModName:"模组名", 
+                thFileName:"文件名", 
+                thVersion:"版本", 
+                thStatus:"状态", 
+                thUpdateTime:"更新时间",
+                thFavorite:"收藏",
+                thDownload:"下载",
+                footer:"欧洲卡车模拟2 组合地图模组排序列表 - 本列表仅供参考，实际使用请根据个人需求调整\n© 2026 瑆泽, 初一爱笑啊 - 所有模组版权归原作者所有",
+                searchPlaceholder:"🔍 按模组名/状态/更新时间搜索...", 
+                updateLogTitle:"更新日志",
+                favoritesTitle:"收藏模组",
+                allModsTitle:"全部模组 (不含删除)", 
+                updateTitle:"更新模组", 
+                newTitle:"新增模组", 
+                moveTitle:"移动模组", 
+                deleteTitle:"删除模组",
+                categoryUpdate:"更新", 
+                categoryNew:"新增", 
+                categoryMove:"移动", 
+                categoryDelete:"删除",
+                searchHistoryTitle:"搜索历史",
+                clearHistory:"清空",
+                emptyMessage:"暂无模组"
+            },
+            en: { 
+                title:"1.58-ETS2 - Map Combo", 
+                statsTitle:"Mod Statistics",
+                quickOpsTitle:"Quick Actions",
+                statAll:"All Mods", 
+                statUpdate:"Update", 
+                statNew:"New", 
+                statMove:"Move", 
+                statDelete:"Delete",
+                statFavorites:"Favorites",
+                btnDownloadAll:"Download All", 
+                btnBackup:"No-sort Save", 
+                btnSortGuide:"Sort Chart", 
+                btnUpdateLog:"Changelog",
+                btnJoinUs:"Join Us",
+                thIndex:"#", 
+                thModName:"Mod Name", 
+                thFileName:"File Name", 
+                thVersion:"Version", 
+                thStatus:"Status", 
+                thUpdateTime:"Updated",
+                thFavorite:"Favorite",
+                thDownload:"Download",
+                footer:"ETS2 Map Combo List - For reference only. Adjust accordingly.\n© 2026 Xingze, Chuyi - All rights to original authors.",
+                searchPlaceholder:"🔍 Search by name/status/updated...", 
+                updateLogTitle:"Changelog",
+                favoritesTitle:"Favorites",
+                allModsTitle:"All Mods (excl. deleted)", 
+                updateTitle:"Update Mods", 
+                newTitle:"New Mods", 
+                moveTitle:"Moved Mods", 
+                deleteTitle:"Deleted Mods",
+                categoryUpdate:"Update", 
+                categoryNew:"New", 
+                categoryMove:"Move", 
+                categoryDelete:"Delete",
+                searchHistoryTitle:"Search History",
+                clearHistory:"Clear",
+                emptyMessage:"No mods found"
+            },
+            ru: { 
+                title:"1.58-ETS2 - Комбо карт", 
+                statsTitle:"Статистика модов",
+                quickOpsTitle:"Быстрые действия",
+                statAll:"Все моды", 
+                statUpdate:"Обновления", 
+                statNew:"Новые", 
+                statMove:"Перемещенные", 
+                statDelete:"Удаленные",
+                statFavorites:"Избранное",
+                btnDownloadAll:"Скачать всё", 
+                btnBackup:"Сохранение без сортировки", 
+                btnSortGuide:"Схема сортировки", 
+                btnUpdateLog:"История изменений",
+                btnJoinUs:"Присоединиться",
+                thIndex:"№", 
+                thModName:"Название мода", 
+                thFileName:"Имя файла", 
+                thVersion:"Версия", 
+                thStatus:"Статус", 
+                thUpdateTime:"Обновлено",
+                thFavorite:"Избранное",
+                thDownload:"Скачать",
+                footer:"Список комбо карт ETS2 - Только для справки. Настраивайте по своему усмотрению.\n© 2026 Синцзэ, Чуи - Все права принадлежат оригинальным авторам.",
+                searchPlaceholder:"🔍 Поиск по названию/статусу/дате...", 
+                updateLogTitle:"История изменений",
+                favoritesTitle:"Избранные моды",
+                allModsTitle:"Все моды (без удаленных)", 
+                updateTitle:"Обновленные моды", 
+                newTitle:"Новые моды", 
+                moveTitle:"Перемещенные моды", 
+                deleteTitle:"Удаленные моды",
+                categoryUpdate:"Обновления", 
+                categoryNew:"Новые", 
+                categoryMove:"Перемещенные", 
+                categoryDelete:"Удаленные",
+                searchHistoryTitle:"История поиска",
+                clearHistory:"Очистить",
+                emptyMessage:"Моды не найдены"
+            },
+            ko: { 
+                title:"1.58-ETS2 - 조합 지도", 
+                statsTitle:"모드 통계",
+                quickOpsTitle:"빠른 작업",
+                statAll:"전체 모드", 
+                statUpdate:"업데이트", 
+                statNew:"신규", 
+                statMove:"이동", 
+                statDelete:"삭제",
+                statFavorites:"즐겨찾기",
+                btnDownloadAll:"전체 다운로드", 
+                btnBackup:"정렬 없는 저장", 
+                btnSortGuide:"정렬 차트", 
+                btnUpdateLog:"변경 기록",
+                btnJoinUs:"참여하기",
+                thIndex:"번호", 
+                thModName:"모드 이름", 
+                thFileName:"파일 이름", 
+                thVersion:"버전", 
+                thStatus:"상태", 
+                thUpdateTime:"업데이트",
+                thFavorite:"즐겨찾기",
+                thDownload:"다운로드",
+                footer:"ETS2 조합 지도 목록 - 참고용입니다. 필요에 따라 조정하세요.\n© 2026 싱저, 추이 - 모든 모드의 저작권은 원저작자에게 있습니다.",
+                searchPlaceholder:"🔍 이름/상태/날짜로 검색...", 
+                updateLogTitle:"변경 기록",
+                favoritesTitle:"즐겨찾는 모드",
+                allModsTitle:"전체 모드 (삭제 제외)", 
+                updateTitle:"업데이트 모드", 
+                newTitle:"신규 모드", 
+                moveTitle:"이동 모드", 
+                deleteTitle:"삭제 모드",
+                categoryUpdate:"업데이트", 
+                categoryNew:"신규", 
+                categoryMove:"이동", 
+                categoryDelete:"삭제",
+                searchHistoryTitle:"검색 기록",
+                clearHistory:"지우기",
+                emptyMessage:"모드가 없습니다"
+            },
+            ja: { 
+                title:"1.58-ETS2 - コンビマップ", 
+                statsTitle:"MOD統計",
+                quickOpsTitle:"クイック操作",
+                statAll:"全MOD", 
+                statUpdate:"更新", 
+                statNew:"新規", 
+                statMove:"移動", 
+                statDelete:"削除",
+                statFavorites:"お気に入り",
+                btnDownloadAll:"一括ダウンロード", 
+                btnBackup:"ソート不要セーブ", 
+                btnSortGuide:"並び順チャート", 
+                btnUpdateLog:"更新履歴",
+                btnJoinUs:"参加する",
+                thIndex:"番号", 
+                thModName:"MOD名", 
+                thFileName:"ファイル名", 
+                thVersion:"バージョン", 
+                thStatus:"ステータス", 
+                thUpdateTime:"更新日",
+                thFavorite:"お気に入り",
+                thDownload:"DL",
+                footer:"ETS2 コンビマップ一覧 - 参考用です。必要に応じて調整してください。\n© 2026 シンツェ, チューイ - 全MODの著作権は原作者に帰属します。",
+                searchPlaceholder:"🔍 名前/ステータス/日付で検索...", 
+                updateLogTitle:"更新履歴",
+                favoritesTitle:"お気に入りMOD",
+                allModsTitle:"全MOD (削除除く)", 
+                updateTitle:"更新MOD", 
+                newTitle:"新規MOD", 
+                moveTitle:"移動MOD", 
+                deleteTitle:"削除MOD",
+                categoryUpdate:"更新", 
+                categoryNew:"新規", 
+                categoryMove:"移動", 
+                categoryDelete:"削除",
+                searchHistoryTitle:"検索履歴",
+                clearHistory:"クリア",
+                emptyMessage:"MODがありません"
+            },
+            de: { 
+                title:"1.58-ETS2 - Kartenkombination", 
+                statsTitle:"Mod-Statistiken",
+                quickOpsTitle:"Schnellaktionen",
+                statAll:"Alle Mods", 
+                statUpdate:"Updates", 
+                statNew:"Neue", 
+                statMove:"Verschobene", 
+                statDelete:"Gelöschte",
+                statFavorites:"Favoriten",
+                btnDownloadAll:"Alle herunterladen", 
+                btnBackup:"Sortierfreier Speicherstand", 
+                btnSortGuide:"Sortierdiagramm", 
+                btnUpdateLog:"Änderungsprotokoll",
+                btnJoinUs:"Mitmachen",
+                thIndex:"Nr.", 
+                thModName:"Mod-Name", 
+                thFileName:"Dateiname", 
+                thVersion:"Version", 
+                thStatus:"Status", 
+                thUpdateTime:"Aktualisiert",
+                thFavorite:"Favorit",
+                thDownload:"Download",
+                footer:"ETS2 Kartenkombinationsliste - Nur als Referenz. Bitte nach Bedarf anpassen.\n© 2026 Xingze, Chuyi - Alle Rechte liegen bei den Originalautoren.",
+                searchPlaceholder:"🔍 Suche nach Name/Status/Datum...", 
+                updateLogTitle:"Änderungsprotokoll",
+                favoritesTitle:"Favoriten-Mods",
+                allModsTitle:"Alle Mods (ohne gelöschte)", 
+                updateTitle:"Aktualisierte Mods", 
+                newTitle:"Neue Mods", 
+                moveTitle:"Verschobene Mods", 
+                deleteTitle:"Gelöschte Mods",
+                categoryUpdate:"Updates", 
+                categoryNew:"Neue", 
+                categoryMove:"Verschobene", 
+                categoryDelete:"Gelöschte",
+                searchHistoryTitle:"Suchverlauf",
+                clearHistory:"Löschen",
+                emptyMessage:"Keine Mods gefunden"
+            },
+            fr: { 
+                title:"1.58-ETS2 - Combo de cartes", 
+                statsTitle:"Statistiques des mods",
+                quickOpsTitle:"Actions rapides",
+                statAll:"Tous les mods", 
+                statUpdate:"Mises à jour", 
+                statNew:"Nouveaux", 
+                statMove:"Déplacés", 
+                statDelete:"Supprimés",
+                statFavorites:"Favoris",
+                btnDownloadAll:"Tout télécharger", 
+                btnBackup:"Sauvegarde sans tri", 
+                btnSortGuide:"Guide de tri", 
+                btnUpdateLog:"Journal des modifications",
+                btnJoinUs:"Nous rejoindre",
+                thIndex:"N°", 
+                thModName:"Nom du mod", 
+                thFileName:"Nom du fichier", 
+                thVersion:"Version", 
+                thStatus:"Statut", 
+                thUpdateTime:"Mis à jour",
+                thFavorite:"Favori",
+                thDownload:"Télécharger",
+                footer:"Liste des combos de cartes ETS2 - Pour référence uniquement. Ajustez selon vos besoins.\n© 2026 Xingze, Chuyi - Tous les droits appartiennent aux auteurs originaux.",
+                searchPlaceholder:"🔍 Recherche par nom/statut/date...", 
+                updateLogTitle:"Journal des modifications",
+                favoritesTitle:"Mods favoris",
+                allModsTitle:"Tous les mods (sans supprimés)", 
+                updateTitle:"Mods mis à jour", 
+                newTitle:"Nouveaux mods", 
+                moveTitle:"Mods déplacés", 
+                deleteTitle:"Mods supprimés",
+                categoryUpdate:"Mises à jour", 
+                categoryNew:"Nouveaux", 
+                categoryMove:"Déplacés", 
+                categoryDelete:"Supprimés",
+                searchHistoryTitle:"Historique de recherche",
+                clearHistory:"Effacer",
+                emptyMessage:"Aucun mod trouvé"
+            }
+        };
+
+        function t(key) {
+            return translations[currentLanguage]?.[key] || translations.zh[key] || key;
+        }
+
+        // 更新按钮链接
+        function updateButtonLinks() {
+            const links = versionLinks[currentVersion] || versionLinks.v1;
+            document.getElementById('backupSave').href = links.backupSave;
+            document.getElementById('sortGuide').href = links.sortGuide;
+        }
+
+        // 应用语言
+        function applyLanguage() {
+            document.getElementById('main-title').innerText = t('title');
+            document.getElementById('sub-title').innerHTML = buildSubtitle();
+            
+            document.querySelectorAll('.left-section-title')[0].innerHTML = `<i class="fas fa-chart-pie"></i> ${t('statsTitle')}`;
+            document.querySelectorAll('.left-section-title')[1].innerHTML = `<i class="fas fa-tools"></i> ${t('quickOpsTitle')}`;
+            
+            document.getElementById('statAllText').innerText = t('statAll');
+            document.getElementById('statUpdateText').innerText = t('statUpdate');
+            document.getElementById('statNewText').innerText = t('statNew');
+            document.getElementById('statMoveText').innerText = t('statMove');
+            document.getElementById('statDeleteText').innerText = t('statDelete');
+            document.getElementById('statFavoritesText').innerText = t('statFavorites');
+            document.getElementById('btnDownloadAll').innerText = t('btnDownloadAll');
+            document.getElementById('btnBackup').innerText = t('btnBackup');
+            document.getElementById('btnSortGuide').innerText = t('btnSortGuide');
+            document.getElementById('btnUpdateLog').innerText = t('btnUpdateLog');
+            document.getElementById('btnJoinUs').innerText = t('btnJoinUs');
+            document.getElementById('thIndex').innerText = t('thIndex');
+            document.getElementById('thModName').innerText = t('thModName');
+            document.getElementById('thFileName').innerText = t('thFileName');
+            document.getElementById('thVersion').innerText = t('thVersion');
+            document.getElementById('thStatus').innerText = t('thStatus');
+            document.getElementById('thUpdateTime').innerText = t('thUpdateTime');
+            document.getElementById('thFavorite').innerText = t('thFavorite');
+            document.getElementById('thDownload').innerText = t('thDownload');
+            document.getElementById('footerText').innerHTML = t('footer').replace('\n','<br>');
+            document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+            
+            updateButtonLinks();
+        }
+
+        // 应用主题
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.body.classList.remove('light-mode');
+            document.getElementById('themeToggle').querySelector('i').classList.remove('fa-sun');
+            document.getElementById('themeToggle').querySelector('i').classList.add('fa-moon');
+        } else {
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('dark-mode');
+            document.getElementById('themeToggle').querySelector('i').classList.remove('fa-moon');
+            document.getElementById('themeToggle').querySelector('i').classList.add('fa-sun');
+        }
+
+        // 语言切换
+        document.getElementById('langSelect').addEventListener('change', (e) => { 
+            currentLanguage = e.target.value; 
+            applyLanguage(); 
+            renderTable(modList); 
+            saveState(); 
+        });
+        
+        // 版本切换
+        document.getElementById('versionSelect').addEventListener('change', (e) => { 
+            currentVersion = e.target.value; 
+            modList = modDataVersions[currentVersion] || modDataVersions.v1; 
+            renderTable(modList); 
+            updateStats(); 
+            updateButtonLinks();
+            applyLanguage(); // 重新应用语言以更新副标题
+            saveState(); 
+        });
+        
+        document.getElementById('langSelect').value = currentLanguage;
+        document.getElementById('versionSelect').value = currentVersion;
+
+        // 初始化按钮链接
+        updateButtonLinks();
+
+        // 展开菜单管理
+        let currentOpenMenu = null;
+
+        function closeAllMenus() {
+            const menus = ['updateMenu', 'newMenu', 'moveMenu', 'deleteMenu', 'updateLogMenu', 'favoritesMenu', 'downloadAllMenu'];
+            menus.forEach(menuId => {
+                const menu = document.getElementById(menuId);
+                if (menu) {
+                    menu.style.display = 'none';
+                }
+            });
+            currentOpenMenu = null;
+        }
+
+        // 构建分类菜单HTML
+        function buildGroupedMenuHTML(items) {
+            const groups = {
+                update: items.filter(m => m.status.includes('更新')),
+                new: items.filter(m => m.status.includes('新增')),
+                move: items.filter(m => m.status.includes('移动')),
+                delete: items.filter(m => m.status.includes('删除'))
+            };
+            
+            let html = '';
+            
+            if (groups.update.length > 0) {
+                html += '<div class="menu-category category-update">';
+                html += `<div class="menu-category-header">${t('categoryUpdate')} (${groups.update.length})</div>`;
+                groups.update.forEach(item => {
+                    let displayName = `${item.name} (${item.file})${item.version ? ' v'+item.version : ''}`;
+                    html += `<div class="expand-menu-item" data-modname="${item.name}">${displayName}</div>`;
+                });
+                html += '</div>';
+            }
+            
+            if (groups.new.length > 0) {
+                html += '<div class="menu-category category-new">';
+                html += `<div class="menu-category-header">${t('categoryNew')} (${groups.new.length})</div>`;
+                groups.new.forEach(item => {
+                    let displayName = `${item.name} (${item.file})${item.version ? ' v'+item.version : ''}`;
+                    html += `<div class="expand-menu-item" data-modname="${item.name}">${displayName}</div>`;
+                });
+                html += '</div>';
+            }
+            
+            if (groups.move.length > 0) {
+                html += '<div class="menu-category category-move">';
+                html += `<div class="menu-category-header">${t('categoryMove')} (${groups.move.length})</div>`;
+                groups.move.forEach(item => {
+                    let displayName = `${item.name} (${item.file})${item.version ? ' v'+item.version : ''}`;
+                    html += `<div class="expand-menu-item" data-modname="${item.name}">${displayName}</div>`;
+                });
+                html += '</div>';
+            }
+            
+            if (groups.delete.length > 0) {
+                html += '<div class="menu-category category-delete">';
+                html += `<div class="menu-category-header">${t('categoryDelete')} (${groups.delete.length})</div>`;
+                groups.delete.forEach(item => {
+                    let displayName = `${item.name} (${item.file})${item.version ? ' v'+item.version : ''}`;
+                    html += `<div class="expand-menu-item" data-modname="${item.name}">${displayName}</div>`;
+                });
+                html += '</div>';
+            }
+            
+            return html;
+        }
+
+        // 切换菜单
+        function toggleMenu(menuId, items, title, isGrouped = false) {
+            const menu = document.getElementById(menuId);
+            
+            if (currentOpenMenu === menuId && menu.style.display === 'block') {
+                menu.style.display = 'none';
+                currentOpenMenu = null;
+                return;
+            }
+            
+            closeAllMenus();
+            
+            let html = '';
+            
+            if (items.length === 0) {
+                html = `<div class="empty-message">${t('emptyMessage')}</div>`;
+            } else {
+                if (isGrouped) {
+                    html = buildGroupedMenuHTML(items);
+                } else {
+                    html = `<div class="expand-menu-header">${title}</div>`;
+                    items.forEach(item => {
+                        let displayName = `${item.name} (${item.file})${item.version ? ' v'+item.version : ''}`;
+                        html += `<div class="expand-menu-item" data-modname="${item.name}">${displayName}</div>`;
+                    });
+                }
+            }
+            
+            menu.innerHTML = html;
+            
+            menu.querySelectorAll('.expand-menu-item').forEach(itemDiv => {
+                itemDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    let modName = itemDiv.dataset.modname;
+                    let rows = document.querySelectorAll('#tableBody tr');
+                    clearRedHighlight();
+                    
+                    for (let row of rows) {
+                        let nameCell = row.querySelector('.mod-name');
+                        if (nameCell && nameCell.innerText.includes(modName)) {
+                            document.getElementById('tableContainer').scrollTo({ top: row.offsetTop - 100, behavior: 'smooth' });
+                            row.classList.add('row-highlight-red');
+                            setTimeout(() => {
+                                row.classList.remove('row-highlight-red');
+                            }, 9999999999999);
+                            break;
+                        }
+                    }
+                });
+            });
+            
+            menu.style.display = 'block';
+            currentOpenMenu = menuId;
+        }
+
+        // 清除红色高亮
+        function clearRedHighlight() { 
+            document.querySelectorAll('#tableBody tr').forEach(r => r.classList.remove('row-highlight-red')); 
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            let tbody = document.getElementById('tableBody'); 
+            tbody.innerHTML = ''; 
+            let visibleIndex = 1;
+            
+            data.forEach(mod => {
+                let isDeleted = mod.status.includes('删除');
+                let row = document.createElement('tr');
+                
+                if (favorites.includes(mod.name)) {
+                    row.classList.add('row-favorite');
+                }
+                
+                if (isDeleted) {
+                    row.classList.add('row-deleted');
+                } else {
+                    if (mod.status.includes('更新')) row.classList.add('row-update');
+                    if (mod.status.includes('新增')) row.classList.add('row-new');
+                    if (mod.status.includes('移动')) row.classList.add('row-move');
+                }
+                
+                // 序号
+                let indexCell = document.createElement('td'); 
+                indexCell.className = 'index-col'; 
+                indexCell.innerText = isDeleted ? '' : visibleIndex++; 
+                row.appendChild(indexCell);
+                
+                // 模组名
+                let nameCell = document.createElement('td'); 
+                nameCell.className = 'mod-name'; 
+                nameCell.innerText = mod.name; 
+                row.appendChild(nameCell);
+                
+                // 文件名
+                let fileCell = document.createElement('td'); 
+                fileCell.className = 'file-name'; 
+                fileCell.innerText = mod.file; 
+                row.appendChild(fileCell);
+                
+                // 版本
+                let verCell = document.createElement('td'); 
+                verCell.className = 'version-col'; 
+                verCell.innerText = mod.version || '—'; 
+                row.appendChild(verCell);
+                
+                // 状态
+                let statusCell = document.createElement('td');
+                mod.status.forEach(s => {
+                    let span = document.createElement('span'); 
+                    span.classList.add('status-badge');
+                    if (s === '新增') span.classList.add('status-new'); 
+                    else if (s === '更新') span.classList.add('status-update'); 
+                    else if (s === '移动') span.classList.add('status-move'); 
+                    else if (s === '删除') span.classList.add('status-delete');
+                    span.innerText = s; 
+                    statusCell.appendChild(span);
+                });
+                row.appendChild(statusCell);
+                
+                // 更新时间
+                let updateCell = document.createElement('td'); 
+                updateCell.innerText = mod.updated || '—'; 
+                row.appendChild(updateCell);
+                
+                // 收藏按钮
+                let favCell = document.createElement('td');
+                if (!isDeleted) {
+                    let favBtn = document.createElement('button');
+                    favBtn.className = 'favorite-star';
+                    favBtn.innerHTML = favorites.includes(mod.name) ? '⭐' : '☆';
+                    favBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleFavorite(mod.name);
+                        favBtn.innerHTML = favorites.includes(mod.name) ? '⭐' : '☆';
+                        updateFavoritesCount();
+                    });
+                    favCell.appendChild(favBtn);
+                }
+                row.appendChild(favCell);
+                
+                // 下载按钮
+                let downCell = document.createElement('td');
+                if (!isDeleted) { 
+                    let a = document.createElement('a'); 
+                    a.href = mod.link || '#'; 
+                    a.target = '_blank'; 
+                    a.classList.add('download-btn'); 
+                    a.innerText = t('thDownload') || '下载'; 
+                    downCell.appendChild(a); 
+                }
+                row.appendChild(downCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // 切换收藏
+        function toggleFavorite(modName) {
+            if (favorites.includes(modName)) {
+                favorites = favorites.filter(f => f !== modName);
+            } else {
+                favorites.push(modName);
+            }
+            saveState();
+            updateFavoritesCount();
+        }
+
+        // 更新收藏计数
+        function updateFavoritesCount() {
+            document.getElementById('favoritesCount').innerText = favorites.length;
+        }
+
+        // 搜索历史管理
+        function addToHistory(keyword) {
+            if (!keyword || keyword.trim() === '') return;
+            
+            keyword = keyword.trim();
+            searchHistory = searchHistory.filter(k => k !== keyword);
+            searchHistory.unshift(keyword);
+            searchHistory = searchHistory.slice(0, 10);
+            
+            saveState();
+            updateSearchHistoryUI();
+        }
+
+        function clearSearchHistory() {
+            searchHistory = [];
+            saveState();
+            updateSearchHistoryUI();
+            hideSearchHistory();
+        }
+
+        function showSearchHistory() {
+            let dropdown = document.getElementById('searchHistoryDropdown');
+            if (searchHistory.length === 0) return;
+            
+            let html = `
+                <div class="search-history-header">
+                    <span>${t('searchHistoryTitle')}</span>
+                    <button class="clear-history-btn" onclick="window.clearSearchHistory()">${t('clearHistory')}</button>
+                </div>
+            `;
+            
+            searchHistory.forEach(term => {
+                html += `
+                    <div class="search-history-item" data-term="${term}">
+                        <i class="fas fa-history"></i>
+                        <span>${term}</span>
+                    </div>
+                `;
+            });
+            
+            dropdown.innerHTML = html;
+            
+            dropdown.querySelectorAll('.search-history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    let term = item.dataset.term;
+                    document.getElementById('searchInput').value = term;
+                    performFilter();
+                    hideSearchHistory();
+                });
+            });
+            
+            dropdown.style.display = 'block';
+            searchHistoryVisible = true;
+        }
+
+        function hideSearchHistory() {
+            document.getElementById('searchHistoryDropdown').style.display = 'none';
+            searchHistoryVisible = false;
+        }
+
+        function updateSearchHistoryUI() {
+            if (searchHistoryVisible && searchHistory.length > 0) {
+                showSearchHistory();
+            } else if (searchHistory.length === 0) {
+                hideSearchHistory();
+            }
+        }
+
+        // 统计更新
+        function updateStats() {
+            let total=0, update=0, newM=0, move=0, del=0;
+            modList.forEach(m => { 
+                if (m.status.includes('删除')) { 
+                    del++; 
+                    return; 
+                } 
+                total++; 
+                if (m.status.includes('更新')) update++; 
+                if (m.status.includes('新增')) newM++; 
+                if (m.status.includes('移动')) move++; 
+            });
+            document.getElementById('totalMods').innerText = total; 
+            document.getElementById('updateCount').innerText = update; 
+            document.getElementById('newCount').innerText = newM; 
+            document.getElementById('moveCount').innerText = move; 
+            document.getElementById('deleteCount').innerText = del;
+            updateFavoritesCount();
+        }
+
+        // 搜索逻辑
+        function performFilter() {
+            let keyword = document.getElementById('searchInput').value.toLowerCase();
+            if (keyword) {
+                addToHistory(keyword);
+            }
+            
+            let filtered = modList.filter(m => 
+                m.name.toLowerCase().includes(keyword) || 
+                m.status.some(s=>s.toLowerCase().includes(keyword)) || 
+                (m.updated && m.updated.toLowerCase().includes(keyword))
+            );
+            renderTable(filtered);
+        }
+
+        // 监听回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performFilter();
+                hideSearchHistory();
+            }
+        });
+
+        // 监听输入框获得焦点：自动清空上一次的搜索内容，并显示历史
+        document.getElementById('searchInput').addEventListener('focus', function() {
+            this.value = '';
+            renderTable(modList);
+            if (searchHistory.length > 0) {
+                showSearchHistory();
+            }
+        });
+
+        // 点击页面其他地方隐藏历史下拉
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box') && !e.target.closest('.search-history-dropdown')) {
+                hideSearchHistory();
+            }
+        });
+
+        // 设置统计按钮
+        function setupStatButtons() {
+            const btns = ['statAll','statUpdate','statNew','statMove','statDelete','statFavorites'];
+            btns.forEach(id => {
+                document.getElementById(id).addEventListener('click', function(e) {
+                    btns.forEach(bid => document.getElementById(bid).classList.remove('purple'));
+                    this.classList.add('purple');
+                });
+            });
+
+            document.getElementById('statUpdate').addEventListener('click', (e) => {
+                e.stopPropagation();
+                let items = modList.filter(m => m.status.includes('更新'));
+                toggleMenu('updateMenu', items, t('updateTitle'));
+            });
+
+            document.getElementById('statNew').addEventListener('click', (e) => {
+                e.stopPropagation();
+                let items = modList.filter(m => m.status.includes('新增'));
+                toggleMenu('newMenu', items, t('newTitle'));
+            });
+
+            document.getElementById('statMove').addEventListener('click', (e) => {
+                e.stopPropagation();
+                let items = modList.filter(m => m.status.includes('移动'));
+                toggleMenu('moveMenu', items, t('moveTitle'));
+            });
+
+            document.getElementById('statDelete').addEventListener('click', (e) => {
+                e.stopPropagation();
+                let items = modList.filter(m => m.status.includes('删除'));
+                toggleMenu('deleteMenu', items, t('deleteTitle'));
+            });
+
+            document.getElementById('statFavorites').addEventListener('click', (e) => {
+                e.stopPropagation();
+                let items = modList.filter(m => favorites.includes(m.name));
+                toggleMenu('favoritesMenu', items, t('favoritesTitle'));
+            });
+
+            document.getElementById('statAll').addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeAllMenus();
+            });
+        }
+
+        // 更新日志按钮
+        document.getElementById('updateLogBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            let items = modList.filter(m => m.status.some(s => ['更新','新增','移动','删除'].includes(s)));
+            toggleMenu('updateLogMenu', items, t('updateLogTitle'), true);
+        });
+
+        // 全局暴露清空历史函数
+        window.clearSearchHistory = clearSearchHistory;
+
+        // 监听表格容器滚动，控制火箭按钮显示
+        const tableContainer = document.getElementById('tableContainer');
+        const scrollBtn = document.getElementById('scrollTopBtn');
+        
+        function toggleScrollButton() {
+            if (tableContainer.scrollTop > 200) {
+                scrollBtn.classList.add('show');
+            } else {
+                scrollBtn.classList.remove('show');
+            }
+        }
+        
+        tableContainer.addEventListener('scroll', toggleScrollButton);
+        
+        // 火箭返回顶部
+        scrollBtn.addEventListener('click', ()=> {
+            tableContainer.scrollTo({top: 0, behavior: 'smooth'});
+        });
+
+        // 开关灯
+        let themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', ()=>{
+            document.body.classList.toggle('dark-mode'); 
+            document.body.classList.toggle('light-mode');
+            let icon = themeToggle.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            saveState();
+        });
+
+        // 一键下载全部模组折叠菜单
+        const downloadBtn = document.getElementById('downloadAllBtn');
+        const downloadMenu = document.getElementById('downloadAllMenu');
+        downloadBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentOpenMenu === 'downloadAllMenu' && downloadMenu.style.display === 'block') {
+                downloadMenu.style.display = 'none';
+                currentOpenMenu = null;
+            } else {
+                closeAllMenus();
+                downloadMenu.style.display = 'block';
+                currentOpenMenu = 'downloadAllMenu';
+            }
+        });
+
+        // 模组包①点击
+        document.getElementById('downloadPack1').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const links = versionLinks[currentVersion] || versionLinks.v1;
+            window.open(links.downloadPack1, '_blank');
+            downloadMenu.style.display = 'none';
+            currentOpenMenu = null;
+        });
+
+        // 模组包②点击
+        document.getElementById('downloadPack2').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const links = versionLinks[currentVersion] || versionLinks.v1;
+            window.open(links.downloadPack2, '_blank');
+            downloadMenu.style.display = 'none';
+            currentOpenMenu = null;
+        });
+
+        // 初始化
+        document.getElementById('searchInput').value = '';
+        applyLanguage(); 
+        renderTable(modList); 
+        updateStats(); 
+        setupStatButtons();
+    })();
+</script>
+</body>
+</html>
