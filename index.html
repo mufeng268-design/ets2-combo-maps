@@ -174,6 +174,7 @@
             transform: translateX(0);
         }
 
+        /* ========== 右上角按钮组 ========== */
         .top-btn-group {
             position: fixed;
             top: 20px;
@@ -181,6 +182,159 @@
             display: flex;
             gap: 12px;
             z-index: 999;
+            align-items: center;
+        }
+
+        /* 搜索按钮 */
+        .search-icon-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--select-border);
+            background: var(--select-bg);
+            color: var(--select-text);
+            font-size: 1.3em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--select-glow);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .search-icon-btn:hover {
+            transform: scale(1.1);
+            border-color: #ff7a00;
+            box-shadow: var(--btn-glow);
+        }
+
+        /* 搜索容器 */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .search-input-wrapper {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            overflow: hidden;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-container:hover .search-input-wrapper,
+        .search-container.active .search-input-wrapper {
+            width: 320px;
+        }
+        .search-box {
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 2px solid var(--select-border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 0.95em;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--select-glow);
+        }
+        .search-box:focus {
+            border-color: #ff7a00;
+            box-shadow: var(--btn-glow);
+        }
+        .search-clear-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--border-card);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 1em;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .search-clear-btn.visible {
+            display: flex;
+        }
+        .search-clear-btn:hover {
+            border-color: #ff7a00;
+            color: #ff7a00;
+        }
+        .search-stats {
+            color: var(--text-desc);
+            font-size: 0.8em;
+            white-space: nowrap;
+            min-width: 80px;
+            text-align: center;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .search-container:hover .search-stats,
+        .search-container.active .search-stats {
+            opacity: 1;
+        }
+
+        /* 排序按钮（圆形） */
+        .sort-icon-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--select-border);
+            background: var(--select-bg);
+            color: var(--select-text);
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--select-glow);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .sort-icon-btn:hover {
+            transform: scale(1.1);
+            border-color: #ff7a00;
+            box-shadow: var(--btn-glow);
+        }
+        .sort-icon-btn.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.5);
+        }
+        .sort-icon-btn .sort-tooltip {
+            position: absolute;
+            right: 60px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-card);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, right 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .sort-icon-btn:hover .sort-tooltip {
+            opacity: 1;
+            right: 55px;
         }
 
         /* 收藏按钮 */
@@ -771,113 +925,7 @@
             opacity: 0.9;
         }
 
-        .tool-bar {
-            max-width: 1400px;
-            margin: 0 auto 35px;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .search-box {
-            padding: 16px 24px;
-            border-radius: 12px;
-            border: 2px solid var(--border-card);
-            background: var(--bg-card);
-            color: var(--text-main);
-            font-size: 1em;
-            width: 400px;
-            outline: none;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        .search-box:focus {
-            border-color: var(--border-card-hover);
-            box-shadow: 0 0 15px rgba(255, 122, 0, 0.2);
-        }
-        .search-clear-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            border: 2px solid var(--border-card);
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            font-size: 1.2em;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        .search-clear-btn.visible {
-            display: flex;
-        }
-        .search-clear-btn:hover {
-            border-color: #ff7a00;
-            color: #ff7a00;
-        }
-        .search-stats {
-            color: var(--text-desc);
-            font-size: 0.9em;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .sort-container {
-            text-align: center;
-            margin-bottom: 45px;
-        }
-        #sortBtn {
-            padding: 15px 32px;
-            background: var(--btn-normal);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.05em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--btn-glow);
-        }
-        #sortBtn:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--btn-glow);
-        }
-        #sortBtn.active {
-            background: linear-gradient(90deg, #10b981, #059669);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
-        }
-
-        .favorite-btn {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.4);
-            border: 2px solid rgba(255,255,255,0.2);
-            color: white;
-            font-size: 1.1em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 2;
-            backdrop-filter: blur(5px);
-        }
-        .favorite-btn.active {
-            color: #ff7a00;
-            background: rgba(255, 122, 0, 0.3);
-            box-shadow: 0 0 10px rgba(255, 122, 0, 0.5);
-            border-color: #ff7a00;
-        }
-        .favorite-btn:hover {
-            transform: scale(1.15);
-        }
-
+        /* ========== 卡片区域 ========== */
         .map-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -929,7 +977,6 @@
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
             position: relative;
         }
-        /* 加载骨架屏动画 */
         .map-thumbnail::before {
             content: '';
             position: absolute;
@@ -949,7 +996,6 @@
             0% { left: -100%; }
             100% { left: 100%; }
         }
-        /* 图片加载完成后隐藏动画 */
         .map-thumbnail.loaded::before {
             display: none;
         }
@@ -1020,6 +1066,35 @@
             left: -15px;
         }
 
+        .favorite-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+        }
+        .favorite-btn.active {
+            color: #ff7a00;
+            background: rgba(255, 122, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 122, 0, 0.5);
+            border-color: #ff7a00;
+        }
+        .favorite-btn:hover {
+            transform: scale(1.15);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -1028,12 +1103,30 @@
         @media (max-width: 768px) {
             .main-title { font-size: 2.4em; }
             .map-grid { grid-template-columns: 1fr; }
-            .search-box { width: 100%; }
             .modal-content { padding: 25px; }
             .favorites-panel { width: 100%; right: -105%; }
             .favorites-panel.open { right: 0; }
-            .tool-bar { flex-direction: column; }
-            .search-stats { text-align: center; }
+            .top-btn-group {
+                top: 10px;
+                right: 10px;
+                gap: 8px;
+            }
+            .version-select {
+                width: 70px;
+                height: 40px;
+                font-size: 0.9em;
+            }
+            #themeToggle,
+            .sort-icon-btn,
+            .search-icon-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1em;
+            }
+            .search-container:hover .search-input-wrapper,
+            .search-container.active .search-input-wrapper {
+                width: 200px;
+            }
         }
     </style>
 </head>
@@ -1045,12 +1138,32 @@
         <div class="loader-circle"></div>
     </div>
 
+    <!-- ========== 右上角按钮组 ========== -->
     <div class="top-btn-group">
+        <!-- 搜索 -->
+        <div class="search-container" id="searchContainer">
+            <div class="search-icon-btn" id="searchIconBtn" title="搜索">🔍</div>
+            <div class="search-input-wrapper">
+                <input type="text" class="search-box" id="searchInput" placeholder="搜索地图名称/区域...">
+                <button class="search-clear-btn" id="searchClearBtn" title="清除搜索">✕</button>
+            </div>
+            <span class="search-stats" id="searchStats"></span>
+        </div>
+
+        <!-- 排序 -->
+        <button class="sort-icon-btn" id="sortBtn" title="排序">
+            📅
+            <span class="sort-tooltip">按更新日期排序</span>
+        </button>
+
+        <!-- 版本选择 -->
         <div class="version-dropdown">
             <select class="version-select" id="versionSelect">
                 <option value="1.58">1.58</option>
             </select>
         </div>
+
+        <!-- 主题切换 -->
         <button id="themeToggle">🌙</button>
     </div>
 
@@ -1144,16 +1257,6 @@
         <h2 class="sub-title">最后更新：<span id="latest-update">2026年04月27日</span></h2>
     </div>
 
-    <div class="tool-bar">
-        <input type="text" class="search-box" id="searchInput" placeholder="🔍 搜索地图名称/区域... (Ctrl+K)">
-        <button class="search-clear-btn" id="searchClearBtn" title="清除搜索">✕</button>
-        <span class="search-stats" id="searchStats"></span>
-    </div>
-
-    <div class="sort-container">
-        <button id="sortBtn">按更新日期排序</button>
-    </div>
-
     <div class="map-grid" id="mapGrid">
         <!-- ========== 1.58 版本 ========== -->
         <!-- 卡片1：组合地图-全球版 -->
@@ -1207,7 +1310,7 @@
             </div>
             <h3 class="map-name">组合地图-联运版-1.58</h3>
             <p class="map-info"><strong>适配版本：</strong>欧卡2 1.58.x 正式版</p>
-            <p class="map-info card-update"><strong>更新时间：</strong>2026年04月28日</p>
+            <p class="map-info card-update"><strong>更新时间：</strong>2026年04月29日</p>
             <p class="map-desc">是否厌倦了自己一个人拉货？但又想玩其他地图？选它，选它，就选它！！！</p>
             <ul class="map-list">
                 <li>需要10个地图DLC</li>
@@ -1329,10 +1432,12 @@
             const cards = document.querySelectorAll('.map-card');
             const defaultCards = Array.from(cards);
             const versionSelect = document.getElementById('versionSelect');
+            const searchContainer = document.getElementById('searchContainer');
             const searchInput = document.getElementById('searchInput');
             const searchClearBtn = document.getElementById('searchClearBtn');
             const searchStats = document.getElementById('searchStats');
             const sortBtn = document.getElementById('sortBtn');
+            const sortTooltip = sortBtn.querySelector('.sort-tooltip');
             const backToTop = document.getElementById('backToTop');
             const themeToggle = document.getElementById('themeToggle');
             let isSorted = false;
@@ -1344,6 +1449,44 @@
                 showToast('加载完成 ✅');
             }, 800);
 
+            // ========== 搜索框悬停逻辑 ==========
+            // 点击搜索图标时聚焦输入框
+            document.getElementById('searchIconBtn').addEventListener('click', () => {
+                if (searchContainer.classList.contains('active')) {
+                    searchInput.value = '';
+                    applySearchFilter(false);
+                    searchContainer.classList.remove('active');
+                    searchStats.textContent = '';
+                    searchClearBtn.classList.remove('visible');
+                } else {
+                    searchContainer.classList.add('active');
+                    searchInput.focus();
+                }
+            });
+
+            // 输入框聚焦时保持展开
+            searchInput.addEventListener('focus', () => {
+                searchContainer.classList.add('active');
+            });
+
+            // 输入框失去焦点时收起（如果没有输入内容）
+            searchInput.addEventListener('blur', () => {
+                if (searchInput.value.trim() === '') {
+                    setTimeout(() => {
+                        if (!searchContainer.matches(':hover')) {
+                            searchContainer.classList.remove('active');
+                        }
+                    }, 200);
+                }
+            });
+
+            // 鼠标离开整个搜索区域时，如果没有输入内容就收起
+            searchContainer.addEventListener('mouseleave', () => {
+                if (searchInput.value.trim() === '' && document.activeElement !== searchInput) {
+                    searchContainer.classList.remove('active');
+                }
+            });
+
             // ========== 版本筛选 ==========
             function filterCardsByVersion(version, showTip = true) {
                 cards.forEach(card => {
@@ -1354,23 +1497,20 @@
                 }
                 applySearchFilter(false);
                 observeCards();
-                // 重新扫描懒加载图片
                 setTimeout(() => {
                     if (window.rescanImages) window.rescanImages();
                 }, 100);
             }
 
-            // ========== 最新更新日期（根据当前版本动态更新） ==========
+            // ========== 最新更新日期 ==========
             function updateLatestDate(version) {
                 let latest = new Date(0);
                 let latestTxt = '';
 
                 document.querySelectorAll('.map-card').forEach(card => {
                     if (card.dataset.version !== version) return;
-
                     const dateEl = card.querySelector('.card-update');
                     if (!dateEl) return;
-
                     const t = dateEl.innerText.replace('更新时间：', '').trim();
                     const d = new Date(t.replace('年', '-').replace('月', '-').replace('日', ''));
                     if (d > latest) {
@@ -1392,7 +1532,6 @@
             const latestVersion = versionOptions[0].value;
             versionSelect.value = latestVersion;
 
-            // 默认展示最新版本
             filterCardsByVersion(latestVersion, false);
             updateLatestDate(latestVersion);
 
@@ -1401,7 +1540,7 @@
                 updateLatestDate(this.value);
             });
 
-            // ========== 搜索功能（带防抖） ==========
+            // ========== 搜索功能 ==========
             function applySearchFilter(showStats = true) {
                 const keyword = searchInput.value.toLowerCase().trim();
                 const version = versionSelect.value;
@@ -1435,13 +1574,16 @@
 
                 if (keyword !== '') {
                     searchClearBtn.classList.add('visible');
+                    searchContainer.classList.add('active');
                 } else {
                     searchClearBtn.classList.remove('visible');
+                    if (document.activeElement !== searchInput) {
+                        searchContainer.classList.remove('active');
+                    }
                 }
 
                 currentSearchTerm = keyword;
                 observeCards();
-                // 重新扫描懒加载图片
                 setTimeout(() => {
                     if (window.rescanImages) window.rescanImages();
                 }, 100);
@@ -1492,14 +1634,14 @@
                     const sorted = [...defaultCards].sort((a, b) => getDate(b.querySelector('.card-update')) - getDate(a.querySelector('.card-update')));
                     mapGrid.innerHTML = '';
                     sorted.forEach(c => mapGrid.appendChild(c));
-                    sortBtn.textContent = '还原默认排序';
+                    sortBtn.innerHTML = '📅<span class="sort-tooltip">还原默认排序</span>';
                     sortBtn.classList.add('active');
                     isSorted = true;
                     showToast('已按更新日期排序 📅');
                 } else {
                     mapGrid.innerHTML = '';
                     defaultCards.forEach(c => mapGrid.appendChild(c));
-                    sortBtn.textContent = '按更新日期排序';
+                    sortBtn.innerHTML = '📅<span class="sort-tooltip">按更新日期排序</span>';
                     sortBtn.classList.remove('active');
                     isSorted = false;
                     showToast('已还原默认排序 🔄');
@@ -1622,23 +1764,25 @@
                         closeSteamModal();
                     } else if (modalsModal.classList.contains('show')) {
                         closeModalsModal();
+                    } else if (searchContainer.classList.contains('active') && searchInput.value.trim() !== '') {
+                        searchInput.value = '';
+                        applySearchFilter(false);
+                        searchStats.textContent = '';
+                        searchClearBtn.classList.remove('visible');
+                        searchContainer.classList.remove('active');
                     }
                 }
             });
 
-            // 初始化收藏
             initFavoriteButtons();
-
-            // ========== 图片懒加载 ==========
             initLazyLoad();
         });
 
-        // ========== 图片懒加载（独立函数，供多处调用） ==========
+        // ========== 图片懒加载 ==========
         let imageObserver = null;
         const loadedImageSet = new Set();
 
         function initLazyLoad() {
-            // 如果已有观察器，先断开
             if (imageObserver) {
                 imageObserver.disconnect();
             }
@@ -1658,7 +1802,6 @@
                 threshold: 0.01
             });
 
-            // 监听所有卡片
             document.querySelectorAll('.map-card').forEach(card => {
                 imageObserver.observe(card);
             });
@@ -1667,7 +1810,6 @@
         function loadImageWithRetry(img, retryCount = 0) {
             const realSrc = img.dataset.src;
             if (!realSrc || loadedImageSet.has(realSrc)) {
-                // 已加载过，直接使用
                 if (loadedImageSet.has(realSrc)) {
                     img.src = realSrc;
                     img.classList.add('loaded');
@@ -1687,12 +1829,10 @@
 
             testImg.onerror = () => {
                 if (retryCount < 1) {
-                    // 2秒后重试一次
                     setTimeout(() => {
                         loadImageWithRetry(img, retryCount + 1);
                     }, 2000);
                 } else {
-                    // 重试失败，显示占位文字
                     img.parentElement.innerHTML = '🗺️ 预览图加载失败';
                 }
             };
@@ -1700,7 +1840,6 @@
             testImg.src = realSrc;
         }
 
-        // 重新扫描懒加载图片（在版本切换/搜索/排序后调用）
         window.rescanImages = function() {
             initLazyLoad();
         };
