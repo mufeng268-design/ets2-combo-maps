@@ -715,6 +715,36 @@
             100% { transform: translateX(-200%); }
         }
 
+        /* 访问量统计显示 */
+        .stats-container {
+            text-align: center;
+            margin: 10px auto 20px;
+            max-width: 1400px;
+        }
+        .stats-text {
+            color: var(--text-desc);
+            font-size: 0.9em;
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .stats-number {
+            font-weight: bold;
+            color: #ff7a00;
+            transition: opacity 0.3s ease;
+        }
+        @keyframes updateFlash {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .update-flash {
+            animation: updateFlash 0.6s ease;
+        }
+
         .nav-bar {
             max-width: 1400px;
             margin: 0 auto 40px;
@@ -1172,17 +1202,18 @@
     <div class="notice">
         <p class="notice-text">📢 提示：所有地图包分版本适配，切换版本查看对应内容，按更新日期排序查看最新，点击卡片即可打开下载链接！Ctrl+K 快速搜索 | 按ESC关闭弹窗</p>
     </div>
-	<!-- 访问量统计显示 -->
-<div style="text-align: center; margin: 10px auto; max-width: 1400px;">
-  <span style="color: var(--text-desc); font-size: 0.9em;">
-    📊 本站总访问量 
-    <span id="busuanzi_value_site_pv" style="font-weight: bold; color: #ff7a00;"></span> 
-    次&nbsp;&nbsp;|&nbsp;&nbsp;
-    👤 访客数 
-    <span id="busuanzi_value_site_uv" style="font-weight: bold; color: #ff7a00;"></span> 
-    人
-  </span>
-</div>
+
+    <!-- 访问量统计显示 -->
+    <div class="stats-container">
+        <span class="stats-text">
+            📊 本站总访问量 
+            <span class="stats-number" id="busuanzi_value_site_pv">--</span> 
+            次&nbsp;&nbsp;|&nbsp;&nbsp;
+            👤 访客数 
+            <span class="stats-number" id="busuanzi_value_site_uv">--</span> 
+            人
+        </span>
+    </div>
 
     <div class="nav-bar">
         <button class="nav-item active" onclick="switchNav(0)">首页</button>
@@ -1855,7 +1886,69 @@
             initLazyLoad();
         };
     </script>
-	<!-- 不蒜子访问量统计 -->
-	<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <!-- 不蒜子访问量统计 -->
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <!-- 访问量定时刷新 -->
+    <script>
+    // 首次加载完成后显示
+    var checkCount = 0;
+    var maxChecks = 20; // 最多检查20秒
+
+    function waitForData() {
+        checkCount++;
+        var pvElem = document.getElementById('busuanzi_value_site_pv');
+        var uvElem = document.getElementById('busuanzi_value_site_uv');
+        
+        // 检查数据是否加载完成
+        var pvReady = pvElem && pvElem.textContent && !isNaN(pvElem.textContent) && parseInt(pvElem.textContent) > 0;
+        var uvReady = uvElem && uvElem.textContent && !isNaN(uvElem.textContent) && parseInt(uvElem.textContent) > 0;
+        
+        if (pvReady && uvReady) {
+            console.log('数据加载完成: PV=' + pvElem.textContent + ', UV=' + uvElem.textContent);
+            startAutoRefresh();
+        } else if (checkCount < maxChecks) {
+            setTimeout(waitForData, 1000); // 每秒检查一次
+        }
+    }
+
+    function startAutoRefresh() {
+        // 每60秒刷新一次（匹配不蒜子的更新频率）
+        setInterval(function() {
+            var pvElem = document.getElementById('busuanzi_value_site_pv');
+            var uvElem = document.getElementById('busuanzi_value_site_uv');
+            
+            if (pvElem) {
+                pvElem.style.opacity = '0.3';
+                pvElem.classList.add('update-flash');
+            }
+            if (uvElem) {
+                uvElem.style.opacity = '0.3';
+                uvElem.classList.add('update-flash');
+            }
+            
+            // 重新加载数据
+            var oldScript = document.querySelector('script[src*="busuanzi.pure.mini"]');
+            if (oldScript) oldScript.remove();
+            
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js?' + Date.now();
+            document.body.appendChild(script);
+            
+            // 恢复显示
+            setTimeout(function() {
+                if (pvElem) pvElem.style.opacity = '1';
+                if (uvElem) uvElem.style.opacity = '1';
+            }, 2000);
+            
+            console.log('访问量数据已更新');
+        }, 60000); // 60000毫秒 = 1分钟
+    }
+
+    // 页面加载后开始等待数据
+    setTimeout(waitForData, 2000); // 等2秒让不蒜子先加载
+    </script>
 </body>
 </html>
