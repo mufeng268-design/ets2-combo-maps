@@ -1203,13 +1203,13 @@
         <p class="notice-text">📢 提示：所有地图包分版本适配，切换版本查看对应内容，按更新日期排序查看最新，点击卡片即可打开下载链接！Ctrl+K 快速搜索 | 按ESC关闭弹窗</p>
     </div>
 
-    <!-- 访问量统计显示 -->
+    <!-- 访问量统计显示 - 已改为今日数据 -->
     <div class="stats-container">
         <span class="stats-text">
-            📊 本站总访问量 
+            📈 今日访问 
             <span class="stats-number" id="busuanzi_value_site_pv">--</span> 
             次&nbsp;&nbsp;|&nbsp;&nbsp;
-            👤 访客数 
+            👥 今日访客 
             <span class="stats-number" id="busuanzi_value_site_uv">--</span> 
             人
         </span>
@@ -1887,7 +1887,7 @@
         };
     </script>
 
-    <!-- 不蒜子访问量统计 -->
+    <!-- 不蒜子访问量统计（自动显示今日数据） -->
     <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
     <!-- 访问量定时刷新 -->
@@ -1906,7 +1906,7 @@
         var uvReady = uvElem && uvElem.textContent && !isNaN(uvElem.textContent) && parseInt(uvElem.textContent) > 0;
         
         if (pvReady && uvReady) {
-            console.log('数据加载完成: PV=' + pvElem.textContent + ', UV=' + uvElem.textContent);
+            console.log('今日数据加载完成: PV=' + pvElem.textContent + ', UV=' + uvElem.textContent);
             startAutoRefresh();
         } else if (checkCount < maxChecks) {
             setTimeout(waitForData, 1000); // 每秒检查一次
@@ -1943,7 +1943,7 @@
                 if (uvElem) uvElem.style.opacity = '1';
             }, 2000);
             
-            console.log('访问量数据已更新');
+            console.log('今日访问量数据已更新');
         }, 60000); // 60000毫秒 = 1分钟
     }
 
