@@ -1125,6 +1125,78 @@
             transform: scale(1.15);
         }
 
+        /* ========== 页脚 ========== */
+        .footer {
+            max-width: 1400px;
+            margin: 50px auto 0;
+            padding: 30px 20px;
+            text-align: center;
+            border-top: 2px solid var(--border-card);
+            background: var(--bg-card);
+            border-radius: 20px 20px 0 0;
+            backdrop-filter: blur(12px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            color: var(--text-desc);
+            font-size: 0.9em;
+            line-height: 2;
+        }
+
+        .footer-content a {
+            color: #ff7a00;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .footer-content a:hover {
+            color: #00e5ff;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+        }
+
+        .footer-divider {
+            color: var(--border-card);
+            margin: 0 5px;
+        }
+
+        .footer-heart {
+            color: #ff7a00;
+            animation: heartbeat 1.5s ease infinite;
+            display: inline-block;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.2); }
+        }
+
+        .footer-copyright {
+            margin-top: 15px;
+            color: var(--text-desc);
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                padding: 20px 15px;
+                margin-top: 30px;
+            }
+            .footer-content {
+                font-size: 0.8em;
+                gap: 10px;
+            }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -1203,7 +1275,7 @@
         <p class="notice-text">📢 提示：所有地图包分版本适配，切换版本查看对应内容，按更新日期排序查看最新，点击卡片即可打开下载链接！Ctrl+K 快速搜索 | 按ESC关闭弹窗</p>
     </div>
 
-    <!-- 访问量统计显示 - 已改为今日数据 -->
+    <!-- 访问量统计显示 -->
     <div class="stats-container">
         <span class="stats-text">
             📈 今日访问 
@@ -1365,6 +1437,27 @@
         </a>
     </div>
 
+    <!-- ========== 页脚 ========== -->
+    <footer class="footer">
+        <div class="footer-content">
+            <span>🚛 欧洲卡车模拟2 组合地图</span>
+            <span class="footer-divider">|</span>
+            <span>作者：<a href="https://xingze.cc" >瑆泽</a> &amp; <a href="https://xingze.cc" >初一爱笑啊</a></span>
+            <span class="footer-divider">|</span>
+            <span>用 <span class="footer-heart">❤️</span> 为卡友提供稳定地图组合</span>
+        </div>
+        <div class="footer-content" style="margin-top: 10px;">
+            <a href="https://xingze.cc" >🌐 瑆泽的小站</a>
+            <span class="footer-divider">|</span>
+            <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">🔝 返回顶部</a>
+            <span class="footer-divider">|</span>
+            <span>版本：<span id="footer-version">1.58</span></span>
+        </div>
+        <div class="footer-copyright">
+            © 2025 - 2026 瑆泽 &amp; 初一爱笑啊 | 仅供学习交流，请支持正版游戏
+        </div>
+    </footer>
+
     <script>
         // ========== 星空粒子背景 ==========
         (function createParticles() {
@@ -1492,7 +1585,6 @@
             }, 800);
 
             // ========== 搜索框悬停逻辑 ==========
-            // 点击搜索图标时聚焦输入框
             document.getElementById('searchIconBtn').addEventListener('click', () => {
                 if (searchContainer.classList.contains('active')) {
                     searchInput.value = '';
@@ -1506,12 +1598,10 @@
                 }
             });
 
-            // 输入框聚焦时保持展开
             searchInput.addEventListener('focus', () => {
                 searchContainer.classList.add('active');
             });
 
-            // 输入框失去焦点时收起（如果没有输入内容）
             searchInput.addEventListener('blur', () => {
                 if (searchInput.value.trim() === '') {
                     setTimeout(() => {
@@ -1522,7 +1612,6 @@
                 }
             });
 
-            // 鼠标离开整个搜索区域时，如果没有输入内容就收起
             searchContainer.addEventListener('mouseleave', () => {
                 if (searchInput.value.trim() === '' && document.activeElement !== searchInput) {
                     searchContainer.classList.remove('active');
@@ -1576,10 +1665,16 @@
 
             filterCardsByVersion(latestVersion, false);
             updateLatestDate(latestVersion);
+            // 同步页脚版本号
+            const footerVersionEl = document.getElementById('footer-version');
+            if (footerVersionEl) footerVersionEl.textContent = latestVersion;
 
             versionSelect.addEventListener('change', function() {
                 filterCardsByVersion(this.value, true);
                 updateLatestDate(this.value);
+                // 同步页脚版本号
+                const footerVersion = document.getElementById('footer-version');
+                if (footerVersion) footerVersion.textContent = this.value;
             });
 
             // ========== 搜索功能 ==========
@@ -1892,16 +1987,14 @@
 
     <!-- 访问量定时刷新 -->
     <script>
-    // 首次加载完成后显示
     var checkCount = 0;
-    var maxChecks = 20; // 最多检查20秒
+    var maxChecks = 20;
 
     function waitForData() {
         checkCount++;
         var pvElem = document.getElementById('busuanzi_value_site_pv');
         var uvElem = document.getElementById('busuanzi_value_site_uv');
         
-        // 检查数据是否加载完成
         var pvReady = pvElem && pvElem.textContent && !isNaN(pvElem.textContent) && parseInt(pvElem.textContent) > 0;
         var uvReady = uvElem && uvElem.textContent && !isNaN(uvElem.textContent) && parseInt(uvElem.textContent) > 0;
         
@@ -1909,17 +2002,15 @@
             console.log('今日数据加载完成: PV=' + pvElem.textContent + ', UV=' + uvElem.textContent);
             startAutoRefresh();
         } else if (checkCount < maxChecks) {
-            setTimeout(waitForData, 1000); // 每秒检查一次
+            setTimeout(waitForData, 1000);
         }
     }
 
     function startAutoRefresh() {
-        // 每60秒通过 JSONP 静默获取最新数据（不删除主脚本，不影响计数）
         setInterval(function() {
             var pvElem = document.getElementById('busuanzi_value_site_pv');
             var uvElem = document.getElementById('busuanzi_value_site_uv');
             
-            // 闪烁提示
             if (pvElem) {
                 pvElem.style.opacity = '0.3';
                 pvElem.classList.add('update-flash');
@@ -1929,7 +2020,6 @@
                 uvElem.classList.add('update-flash');
             }
             
-            // 通过 JSONP 读取最新数据（不影响计数）
             var callbackName = 'busuanzi_cb_' + Date.now();
             window[callbackName] = function(data) {
                 if (data && data.site_pv !== undefined) {
@@ -1942,7 +2032,6 @@
                         uvElem.textContent = data.site_uv;
                     }
                 }
-                // 清理回调
                 delete window[callbackName];
                 var oldScript = document.getElementById(callbackName);
                 if (oldScript) oldScript.remove();
@@ -1953,18 +2042,16 @@
             jsonpScript.src = 'https://busuanzi.ibruce.info/busuanzi?jsonpCallback=' + callbackName;
             document.body.appendChild(jsonpScript);
             
-            // 恢复显示
             setTimeout(function() {
                 if (pvElem) pvElem.style.opacity = '1';
                 if (uvElem) uvElem.style.opacity = '1';
             }, 2000);
             
             console.log('今日访问量数据已刷新');
-        }, 60000); // 60000毫秒 = 1分钟
+        }, 60000);
     }
 
-    // 页面加载后开始等待数据
-    setTimeout(waitForData, 2000); // 等2秒让不蒜子先加载
+    setTimeout(waitForData, 2000);
     </script>
 </body>
 </html>
