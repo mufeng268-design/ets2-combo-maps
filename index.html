@@ -1887,7 +1887,7 @@
         };
     </script>
 
-    <!-- 不蒜子访问量统计（自动显示今日数据） -->
+    <!-- 不蒜子访问量统计（只加载一次，不重复删除重建） -->
     <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
     <!-- 访问量定时刷新 -->
@@ -1914,11 +1914,12 @@
     }
 
     function startAutoRefresh() {
-        // 每60秒刷新一次（匹配不蒜子的更新频率）
+        // 每60秒通过 JSONP 静默获取最新数据（不删除主脚本，不影响计数）
         setInterval(function() {
             var pvElem = document.getElementById('busuanzi_value_site_pv');
             var uvElem = document.getElementById('busuanzi_value_site_uv');
             
+            // 闪烁提示
             if (pvElem) {
                 pvElem.style.opacity = '0.3';
                 pvElem.classList.add('update-flash');
@@ -1928,14 +1929,29 @@
                 uvElem.classList.add('update-flash');
             }
             
-            // 重新加载数据
-            var oldScript = document.querySelector('script[src*="busuanzi.pure.mini"]');
-            if (oldScript) oldScript.remove();
+            // 通过 JSONP 读取最新数据（不影响计数）
+            var callbackName = 'busuanzi_cb_' + Date.now();
+            window[callbackName] = function(data) {
+                if (data && data.site_pv !== undefined) {
+                    if (pvElem) {
+                        pvElem.textContent = data.site_pv;
+                    }
+                }
+                if (data && data.site_uv !== undefined) {
+                    if (uvElem) {
+                        uvElem.textContent = data.site_uv;
+                    }
+                }
+                // 清理回调
+                delete window[callbackName];
+                var oldScript = document.getElementById(callbackName);
+                if (oldScript) oldScript.remove();
+            };
             
-            var script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js?' + Date.now();
-            document.body.appendChild(script);
+            var jsonpScript = document.createElement('script');
+            jsonpScript.id = callbackName;
+            jsonpScript.src = 'https://busuanzi.ibruce.info/busuanzi?jsonpCallback=' + callbackName;
+            document.body.appendChild(jsonpScript);
             
             // 恢复显示
             setTimeout(function() {
@@ -1943,7 +1959,7 @@
                 if (uvElem) uvElem.style.opacity = '1';
             }, 2000);
             
-            console.log('今日访问量数据已更新');
+            console.log('今日访问量数据已刷新');
         }, 60000); // 60000毫秒 = 1分钟
     }
 
